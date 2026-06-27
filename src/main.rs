@@ -1,15 +1,20 @@
 use dioxus::prelude::*;
 
-use views::DesignSystem;
+use views::{BlogList, BlogPost, DesignSystem};
 
+mod blog;
 mod components;
 mod views;
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
 enum Route {
-    #[redirect("/", || Route::DesignSystem {})]
-    #[redirect("/index.html", || Route::DesignSystem {})]
+    #[redirect("/", || Route::BlogList {})]
+    #[redirect("/index.html", || Route::BlogList {})]
+    #[route("/blog")]
+    BlogList {},
+    #[route("/blog/:slug")]
+    BlogPost { slug: String },
     #[route("/design-system")]
     DesignSystem {},
     #[route("/:..segments")]

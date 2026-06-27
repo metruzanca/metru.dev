@@ -8,6 +8,12 @@ edition = "2021"
 
 [dependencies]
 dioxus = { version = "0.7.1", features = ["router", "fullstack"] }
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+markdown = "1"
+regex = "1"
+syntect = { version = "5", default-features = false, features = ["default-fancy", "default-themes", "default-syntaxes", "parsing", "html"] }
+two-face = { version = "0.5", default-features = false, features = ["syntect-fancy"] }
 
 [features]
 default = ["web"]
