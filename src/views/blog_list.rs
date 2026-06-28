@@ -9,9 +9,8 @@ pub fn BlogList() -> Element {
     let nav = use_navigator();
 
     rsx! {
-        div { class: "min-h-screen bg-background",
-            div { class: "mx-auto max-w-3xl px-6 py-24",
-                header { class: "mb-16",
+        div { class: "mx-auto max-w-3xl px-6 py-24",
+            header { class: "mb-16",
                     h1 { class: "font-heading text-4xl font-extrabold tracking-tight text-glow-pink",
                         "metru.dev"
                     }
@@ -65,7 +64,6 @@ pub fn BlogList() -> Element {
                         }
                     }
                 }
-            }
         }
     }
 }

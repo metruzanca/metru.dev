@@ -10,7 +10,7 @@ pub fn BlogPost(slug: String) -> Element {
 
     match post {
         None => rsx! {
-            div { class: "flex min-h-screen items-center justify-center bg-background",
+            div { class: "flex items-center justify-center py-24",
                 div { class: "text-center",
                     h1 { class: "font-heading text-2xl text-foreground", "Post not found" }
                     p { class: "mt-2 text-muted-foreground", "The post you're looking for doesn't exist or hasn't been published yet." }
@@ -31,8 +31,7 @@ pub fn BlogPost(slug: String) -> Element {
             let html = blog::render_markdown(&post.body_markdown);
 
             rsx! {
-                div { class: "min-h-screen bg-background",
-                    article { class: "mx-auto max-w-3xl px-6 py-24",
+                article { class: "mx-auto max-w-3xl px-6 py-24",
                         header { class: "mb-12",
                             a {
                                 class: "mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-neon-cyan transition-colors",
@@ -76,7 +75,6 @@ pub fn BlogPost(slug: String) -> Element {
                             dangerous_inner_html: html,
                         }
                     }
-                }
             }
         }
     }

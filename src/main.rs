@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 
+use components::layout::SiteLayout;
 use views::{BlogList, BlogPost, DesignSystem, Landing};
 
 mod blog;
@@ -9,13 +10,14 @@ mod views;
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
 enum Route {
-    #[route("/")]
-    Landing {},
-    #[redirect("/index.html", || Route::Landing {})]
-    #[route("/blog")]
-    BlogList {},
-    #[route("/blog/:slug")]
-    BlogPost { slug: String },
+    #[layout(SiteLayout)]
+        #[route("/")]
+        Landing {},
+        #[redirect("/index.html", || Route::Landing {})]
+        #[route("/blog")]
+        BlogList {},
+        #[route("/blog/:slug")]
+        BlogPost { slug: String },
     #[route("/design-system")]
     DesignSystem {},
     #[route("/:..segments")]
