@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use views::{BlogList, BlogPost, DesignSystem};
+use views::{BlogList, BlogPost, DesignSystem, Landing};
 
 mod blog;
 mod components;
@@ -9,8 +9,9 @@ mod views;
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
 enum Route {
-    #[redirect("/", || Route::BlogList {})]
-    #[redirect("/index.html", || Route::BlogList {})]
+    #[route("/")]
+    Landing {},
+    #[redirect("/index.html", || Route::Landing {})]
     #[route("/blog")]
     BlogList {},
     #[route("/blog/:slug")]
@@ -28,7 +29,7 @@ const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 fn NotFound(segments: Vec<String>) -> Element {
     let nav = use_navigator();
     use_effect(move || {
-        nav.push(Route::DesignSystem {});
+        nav.push(Route::Landing {});
     });
     rsx! {}
 }
