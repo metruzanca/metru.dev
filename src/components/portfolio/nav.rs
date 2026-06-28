@@ -3,7 +3,6 @@ use dioxus::prelude::*;
 use crate::components::ui::icons::{GitBranchIcon, AtSignIcon, SendIcon};
 
 const LINKS: &[(&str, &str)] = &[
-    ("~/", "#top"),
     ("/projects", "#projects"),
     ("/writing", "#writing"),
     ("/activity", "#activity"),
