@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::{GitBranchIcon, XIcon, MailIcon, LinkedInIcon};
 use super::section_heading::PortfolioSectionHeading;
+use crate::components::ui::icons::{CalendarIcon, GitBranchIcon, LinkedInIcon, MailIcon, XIcon};
 
 struct Channel<'a> {
     label: &'a str,
@@ -11,10 +11,36 @@ struct Channel<'a> {
 }
 
 const CHANNELS: &[Channel] = &[
-    Channel { label: "github", handle: "@metruzanca", href: "https://github.com/metruzanca", is_mail: false },
-    Channel { label: "x", handle: "@metruzanca", href: "https://x.com/metruzanca", is_mail: false },
-    Channel { label: "linkedin", handle: "@samuele-zanca", href: "https://linkedin.com/in/samuele-zanca", is_mail: false },
-    Channel { label: "email", handle: "sam(at)zanca.dev", href: "", is_mail: true },
+    Channel {
+        label: "calendar",
+        handle: "schedule a chat",
+        href: "https://cal.com/samzanca/15min",
+        is_mail: false,
+    },
+    Channel {
+        label: "linkedin",
+        handle: "@samuele-zanca",
+        href: "https://linkedin.com/in/samuele-zanca",
+        is_mail: false,
+    },
+    Channel {
+        label: "x",
+        handle: "@metruzanca",
+        href: "https://x.com/metruzanca",
+        is_mail: false,
+    },
+    Channel {
+        label: "github",
+        handle: "@metruzanca",
+        href: "https://github.com/metruzanca",
+        is_mail: false,
+    },
+    Channel {
+        label: "email",
+        handle: "sam(at)zanca.dev",
+        href: "",
+        is_mail: true,
+    },
 ];
 
 #[component]
@@ -81,6 +107,8 @@ fn channel_icon(i: usize) -> Element {
         0 => rsx! { GitBranchIcon { class: "size-4 text-muted-foreground" } },
         1 => rsx! { XIcon { class: "size-4 text-muted-foreground" } },
         2 => rsx! { LinkedInIcon { class: "size-4 text-muted-foreground" } },
-        _ => rsx! { MailIcon { class: "size-4 text-muted-foreground" } },
+        3 => rsx! { MailIcon { class: "size-4 text-muted-foreground" } },
+        4 => rsx! { CalendarIcon { class: "size-4 text-muted-foreground" } },
+        _ => rsx! {},
     }
 }

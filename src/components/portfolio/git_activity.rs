@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::github;
 use super::section_heading::PortfolioSectionHeading;
+use crate::github;
 
 const LEVEL_CLASSES: &[&str] = &[
     "bg-muted/40",
@@ -23,7 +23,9 @@ fn month_labels(cells: &[github::ContributionCell]) -> Vec<String> {
         if d.len() >= 3 {
             labels.push(d[..3].to_string());
         }
-        if labels.len() == 5 { break; }
+        if labels.len() == 5 {
+            break;
+        }
     }
     // Always include the last month
     if let Some(last) = cells.last() {
@@ -64,7 +66,12 @@ pub fn GitActivity() -> Element {
                         }
                     }
                     span { class: "font-mono text-xs text-muted-foreground",
-                        "@metruzanca on github"
+                      a {
+                          class: "transition-colors hover:text-primary",
+                          href: "https://github.com/metruzanca",
+                          "@metruzanca"
+                      }
+                      " on github"
                     }
                 }
 
