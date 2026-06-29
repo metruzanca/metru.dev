@@ -2,7 +2,33 @@ use dioxus::prelude::*;
 
 use crate::components::ui::icons::GitBranchIcon;
 use crate::github::{self, GithubRepo};
-use super::section_heading::{PortfolioSectionHeading, SectionAction};
+
+#[component]
+pub fn ProjectsList() -> Element {
+    let repos = github::all_repos();
+
+    rsx! {
+        main { class: "mx-auto max-w-3xl px-4 pb-12 pt-14 md:pt-20",
+            div { class: "grid grid-cols-1 gap-4 sm:grid-cols-2",
+                for repo in repos {
+                    ProjectCard { repo: *repo }
+                }
+            }
+
+            footer { class: "border-t border-border px-4 py-8 mt-12",
+                div { class: "flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center",
+                    p { class: "font-mono text-xs text-muted-foreground",
+                        span { class: "text-primary", "$" }
+                        " built with synthwave \u{2014} \u{a9} 2026 Sam"
+                    }
+                    p { class: "font-mono text-xs text-muted-foreground",
+                        "designed in the neon"
+                    }
+                }
+            }
+        }
+    }
+}
 
 fn tag_accent(index: usize) -> &'static str {
     if index % 2 == 0 { "primary" } else { "cyan" }
@@ -25,30 +51,6 @@ fn format_commit_date(iso: &str) -> String {
     };
     let year = &iso[0..4];
     format!("{month} {year}")
-}
-
-#[component]
-pub fn PortfolioProjects() -> Element {
-    let repos = github::pinned_repos();
-
-    rsx! {
-        section { id: "projects", class: "px-4 py-12",
-            PortfolioSectionHeading {
-                index: "01".to_string(),
-                label: "building".to_string(),
-                action: Some(SectionAction {
-                    label: "all projects".to_string(),
-                    href: "/projects".to_string(),
-                }),
-            }
-
-            div { class: "grid grid-cols-1 gap-4 sm:grid-cols-2",
-                for repo in repos {
-                    ProjectCard { repo: *repo }
-                }
-            }
-        }
-    }
 }
 
 #[component]
