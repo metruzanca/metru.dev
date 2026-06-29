@@ -1,58 +1,25 @@
-# Development
+# metru.dev
 
-Your new jumpstart project includes basic organization with an organized `assets` folder and a `components` folder.
-If you chose to develop with the router feature, you will also have a `views` folder.
+<img src=".github/hero.png" alt="metru.dev landing page" />
 
-```
-project/
-├─ assets/ # Any assets that are used by the app should be placed here
-├─ src/
-│  ├─ main.rs # The entrypoint for the app. It also defines the routes for the app.
-│  ├─ components/
-│  │  ├─ mod.rs # Defines the components module
-│  │  ├─ hero.rs # The Hero component for use in the home page
-│  │  ├─ echo.rs # The echo component uses server functions to communicate with the server
-│  ├─ views/ # The views each route will render in the app.
-│  │  ├─ mod.rs # Defines the module for the views route and re-exports the components for each route
-│  │  ├─ blog.rs # The component that will render at the /blog/:id route
-│  │  ├─ home.rs # The component that will render at the / route
-├─ Cargo.toml # The Cargo.toml file defines the dependencies and feature flags for your project
-```
+Personal porfolio built with [Dioxus 0.7](https://dioxuslabs.com) and with a Synthwave inspired design-system with Geist + Orbitron fonts and dark-only color scheme.
 
-### Automatic Tailwind (Dioxus 0.7+)
+## How it works
 
-As of Dioxus 0.7, there no longer is a need to manually install tailwind. Simply `dx serve` and you're good to go!
+The site is a **Dioxus fullstack** app — Rust on both client and server. At build time:
 
-Automatic tailwind is supported by checking for a file called `tailwind.css` in your app's manifest directory (next to Cargo.toml). To customize the file, use the dioxus.toml:
+- **Blog posts** are read from `blog/*.md`, code-generated into Rust constants via `build.rs`, and rendered with syntax-highlighted MDX.
+- **GitHub data** (pinned repos, all public repos, contribution graph) is fetched from the GitHub GraphQL API using `octocrab` and baked into the binary. Requires a `GITHUB_TOKEN` at build time.
 
-```toml
-[application]
-tailwind_input = "my.css"
-tailwind_output = "assets/out.css"
-```
+At runtime the server renders pages via Dioxus SSR and hydrates them on the client.
 
-### Tailwind Manual Install
+## Hosting
 
-To use tailwind plugins or manually customize tailwind, you can can install the Tailwind CLI and use it directly.
+Built into a single static binary via `dx bundle --web --release` and deployed as a Docker container on [Railway](https://railway.app). The `Dockerfile` uses `cargo-chef` for cached dependency builds and bundles the server + assets into a slim runtime image.
 
-1. Install npm: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Install the Tailwind CSS CLI: https://tailwindcss.com/docs/installation/tailwind-cli
-3. Run the following command in the root of the project to start the Tailwind CSS compiler:
+## Development
 
 ```bash
-npx @tailwindcss/cli -i ./input.css -o ./assets/tailwind.css --watch
+# Dioxus-CLI
+dx serve
 ```
-
-### Serving Your App
-
-Run the following command in the root of your project to start developing with the default platform:
-
-```bash
-dx serve --platform web
-```
-
-To run for a different platform, use the `--platform platform` flag. E.g.
-```bash
-dx serve --platform desktop
-```
-
