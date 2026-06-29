@@ -12,6 +12,8 @@ RUN cargo chef prepare --recipe-path recipe.json
 # 2. Build out app
 
 FROM chef AS builder
+ARG GITHUB_TOKEN
+ENV GITHUB_TOKEN=$GITHUB_TOKEN
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
