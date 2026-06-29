@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use components::layout::SiteLayout;
-use views::{BlogList, BlogPost, DesignSystem, Landing, ProjectsList};
+use views::{BlogList, BlogPost, DesignSystem, Landing, ProjectsList, ResumePage};
 
 mod blog;
 mod components;
@@ -23,6 +23,8 @@ enum Route {
         BlogPost { slug: String },
     #[route("/design-system")]
     DesignSystem {},
+    #[route("/resume")]
+    ResumePage {},
     #[route("/:..segments")]
     NotFound { segments: Vec<String> },
 }

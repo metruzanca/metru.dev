@@ -3,14 +3,14 @@ use dioxus::prelude::*;
 use super::section_heading::PortfolioSectionHeading;
 use crate::components::ui::icons::{CalendarIcon, GitBranchIcon, LinkedInIcon, MailIcon, XIcon};
 
-struct Channel<'a> {
-    label: &'a str,
-    handle: &'a str,
-    href: &'a str,
-    is_mail: bool,
+pub struct Channel<'a> {
+    pub label: &'a str,
+    pub handle: &'a str,
+    pub href: &'a str,
+    pub is_mail: bool,
 }
 
-const CHANNELS: &[Channel] = &[
+pub const CHANNELS: &[Channel] = &[
     Channel {
         label: "calendar",
         handle: "schedule a chat",
@@ -102,7 +102,7 @@ pub fn PortfolioContact() -> Element {
     }
 }
 
-fn channel_icon(i: usize) -> Element {
+pub fn channel_icon(i: usize) -> Element {
     match i {
         0 => rsx! { GitBranchIcon { class: "size-4 text-muted-foreground" } },
         1 => rsx! { XIcon { class: "size-4 text-muted-foreground" } },

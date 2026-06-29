@@ -9,11 +9,13 @@ edition = "2021"
 [dependencies]
 dioxus = { version = "0.7.1", features = ["router", "fullstack"] }
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 serde_yaml = "0.9"
 markdown = "1"
 regex = "1"
 syntect = { version = "5", default-features = false, features = ["default-fancy", "default-themes", "default-syntaxes", "parsing", "html"] }
 two-face = { version = "0.5", default-features = false, features = ["syntect-fancy"] }
+ureq = { version = "2", features = ["json"], optional = true }
 
 [build-dependencies]
 ureq = { version = "2", features = ["json"] }
@@ -29,4 +31,4 @@ desktop = ["dioxus/desktop"]
 # The feature that are only required for the mobile = ["dioxus/mobile"] build target should be optional and only enabled in the mobile = ["dioxus/mobile"] feature
 mobile = ["dioxus/mobile"]
 # The feature that are only required for the server = ["dioxus/server"] build target should be optional and only enabled in the server = ["dioxus/server"] feature
-server = ["dioxus/server"]
+server = ["dioxus/server", "dep:ureq"]
