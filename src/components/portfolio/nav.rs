@@ -1,13 +1,8 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::{GitBranchIcon, AtSignIcon, SendIcon};
+use crate::components::ui::icons::{BlueSkyIcon, GitBranchIcon, XIcon};
 
-const LINKS: &[(&str, &str)] = &[
-    ("/projects", "#projects"),
-    ("/writing", "#writing"),
-    ("/activity", "#activity"),
-    ("/contact", "#contact"),
-];
+const LINKS: &[(&str, &str)] = &[("/projects", "/projects"), ("/blog", "/blog")];
 
 #[component]
 pub fn PortfolioNav() -> Element {
@@ -16,10 +11,9 @@ pub fn PortfolioNav() -> Element {
             div { class: "mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3",
                 a {
                     class: "flex items-center gap-2 font-mono text-sm text-foreground",
-                    href: "#top",
+                    href: "/",
                     span { class: "inline-block size-2 rounded-full bg-primary shadow-glow-pink" }
-                    span { class: "font-semibold", "sam" }
-                    span { class: "text-muted-foreground", "\u{b7} dev" }
+                    span { class: "font-semibold font-display", "SAM" }
                 }
 
                 nav { class: "hidden items-center gap-1 sm:flex", aria_label: "Primary",
@@ -35,7 +29,7 @@ pub fn PortfolioNav() -> Element {
                 div { class: "flex items-center gap-1",
                     a {
                         class: "rounded-md p-1.5 text-muted-foreground transition-colors hover:text-primary",
-                        href: "https://github.com",
+                        href: "https://github.com/metruzanca",
                         target: "_blank",
                         rel: "noreferrer",
                         aria_label: "GitHub",
@@ -43,17 +37,19 @@ pub fn PortfolioNav() -> Element {
                     }
                     a {
                         class: "rounded-md p-1.5 text-muted-foreground transition-colors hover:text-primary",
-                        href: "https://x.com",
+                        href: "https://x.com/metruzanca",
                         target: "_blank",
                         rel: "noreferrer",
                         aria_label: "X / Twitter",
-                        AtSignIcon { class: "size-4" }
+                        XIcon { class: "size-4" }
                     }
                     a {
                         class: "rounded-md p-1.5 text-muted-foreground transition-colors hover:text-primary",
-                        href: "#contact",
-                        aria_label: "Contact",
-                        SendIcon { class: "size-4" }
+                        href: "https://bsky.app/profile/metru.dev",
+                        target: "_blank",
+                        rel: "noreferrer",
+                        aria_label: "BlueSky",
+                        BlueSkyIcon { class: "size-4" }
                     }
                 }
             }
