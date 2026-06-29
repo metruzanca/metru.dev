@@ -1,13 +1,11 @@
 use dioxus::prelude::*;
 
 use crate::blog;
-use crate::Route;
 use super::section_heading::{PortfolioSectionHeading, SectionAction};
 
 #[component]
 pub fn PortfolioWriting() -> Element {
     let posts = blog::published_posts();
-    let nav = use_navigator();
 
     rsx! {
         section { id: "writing", class: "px-4 py-12",
@@ -31,7 +29,6 @@ pub fn PortfolioWriting() -> Element {
 
 #[component]
 pub fn WritingItem(post: blog::BlogPost, expanded: Option<bool>) -> Element {
-    let nav = use_navigator();
     let slug = post.slug.clone();
     let date = format_post_date(&post.frontmatter.timestamp);
     let read_time = estimate_read_time(&post.body_markdown);
@@ -41,13 +38,7 @@ pub fn WritingItem(post: blog::BlogPost, expanded: Option<bool>) -> Element {
         li { class: "group border-b border-border transition-colors hover:border-accent/50",
             a {
                 class: "flex items-baseline gap-4 py-3.5 cursor-pointer",
-                onclick: {
-                    let slug = slug.clone();
-                    move |e| {
-                        e.prevent_default();
-                        nav.push(Route::BlogPost { slug: slug.clone() });
-                    }
-                },
+                href: "/blog/{slug}",
                 time { class: "hidden w-28 shrink-0 font-mono text-xs text-muted-foreground sm:block",
                     "{date}"
                 }

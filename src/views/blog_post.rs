@@ -31,19 +31,8 @@ pub fn BlogPost(slug: String) -> Element {
             let html = blog::render_markdown(&post.body_markdown);
 
             rsx! {
-                article { class: "mx-auto max-w-3xl px-6 py-24",
+                article { class: "mx-auto max-w-3xl px-6 pt-12 pb-24",
                         header { class: "mb-12",
-                            a {
-                                class: "mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-neon-cyan transition-colors",
-                                href: "/blog",
-                                onclick: move |e| {
-                                    e.prevent_default();
-                                    nav.push(Route::BlogList {});
-                                },
-                                span { class: "text-lg leading-none", "\u{2190}" }
-                                " Blog"
-                            }
-
                             time {
                                 class: "mb-3 block font-mono text-sm text-muted-foreground",
                                 datetime: "{frontmatter.timestamp}",
@@ -52,10 +41,6 @@ pub fn BlogPost(slug: String) -> Element {
 
                             h1 { class: "font-heading text-4xl font-extrabold tracking-tight text-glow-pink leading-tight",
                                 "{frontmatter.title}"
-                            }
-
-                            p { class: "mt-4 text-lg leading-relaxed text-muted-foreground",
-                                "{frontmatter.description}"
                             }
 
                             if !frontmatter.tags.is_empty() {

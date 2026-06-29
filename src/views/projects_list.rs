@@ -21,9 +21,6 @@ pub fn ProjectsList() -> Element {
                         span { class: "text-primary", "$" }
                         " built with synthwave \u{2014} \u{a9} 2026 Sam"
                     }
-                    p { class: "font-mono text-xs text-muted-foreground",
-                        "designed in the neon"
-                    }
                 }
             }
         }

@@ -48,6 +48,21 @@ fn main() {
 
     println!("cargo:rerun-if-changed=blog/");
 
+    // Copy blog _assets into the public directory so Dioxus serves them
+    let blog_assets_dir = format!("{manifest_dir}/blog/_assets");
+    let dest_assets_dir = format!("{manifest_dir}/public/assets/blog");
+    if let Ok(entries) = fs::read_dir(&blog_assets_dir) {
+        let _ = fs::create_dir_all(&dest_assets_dir);
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_file() {
+                let dest = format!("{}/{}", dest_assets_dir, path.file_name().unwrap().to_string_lossy());
+                let _ = fs::copy(&path, &dest);
+            }
+        }
+    }
+    println!("cargo:rerun-if-changed=blog/_assets/");
+
     // Fetch GitHub data
     fetch_github_data(&out_dir);
 }

@@ -866,6 +866,9 @@
   .py-24 {
     padding-block: calc(var(--spacing) * 24);
   }
+  .pt-12 {
+    padding-top: calc(var(--spacing) * 12);
+  }
   .pt-14 {
     padding-top: calc(var(--spacing) * 14);
   }
@@ -880,6 +883,9 @@
   }
   .pb-12 {
     padding-bottom: calc(var(--spacing) * 12);
+  }
+  .pb-24 {
+    padding-bottom: calc(var(--spacing) * 24);
   }
   .pl-9 {
     padding-left: calc(var(--spacing) * 9);
