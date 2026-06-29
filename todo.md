@@ -1,3 +1,11 @@
+- [x] Synthwave design system
+- [ ] Blog posts with markdown support.
+- [x] Landing page featuring:
+  - hero section
+  - projects from github
+  - blog posts
+  - small contact section
+- [x] Resume page
 - [ ] Whitewind integration
 - [ ] Whitewind/ATProto comments
 - [ ] ATProto Guestbook
@@ -23,4 +31,4 @@
   - [Software Craftsmanship](https://manifesto.softwarecraftsmanship.org/)
   - [Agile](https://agilemanifesto.org/)
 - [ ] A Gear page
-- [ ]
+- [ ] Improve the datafetching. Currently its all at buildtime, but theres things we might want to do at runtime on a schedule, like blogposts and repositories.
