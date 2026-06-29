@@ -12,6 +12,12 @@ pub struct GithubRepo {
     pub committed_date: Option<&'static str>,
 }
 
+pub struct ContributionCell {
+    pub level: u8,
+    pub count: u32,
+    pub date: &'static str,
+}
+
 include!(concat!(env!("OUT_DIR"), "/github_repos.rs"));
 
 pub fn pinned_repos() -> &'static [GithubRepo] {
@@ -20,4 +26,12 @@ pub fn pinned_repos() -> &'static [GithubRepo] {
 
 pub fn all_repos() -> &'static [GithubRepo] {
     ALL_REPOS
+}
+
+pub fn contribution_total() -> u32 {
+    CONTRIBUTION_TOTAL
+}
+
+pub fn contribution_cells() -> &'static [ContributionCell] {
+    CONTRIBUTION_CELLS
 }

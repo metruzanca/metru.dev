@@ -74,6 +74,37 @@ struct GraphQLUser {
     pinnedItems: PinnedItems,
     #[serde(default)]
     repositories: Repositories,
+    #[serde(default)]
+    contributionsCollection: ContributionsCollection,
+}
+
+#[derive(Deserialize, Default)]
+#[allow(non_snake_case)]
+struct ContributionsCollection {
+    #[serde(default)]
+    contributionCalendar: ContributionCalendar,
+}
+
+#[derive(Deserialize, Default)]
+struct ContributionCalendar {
+    #[serde(default)]
+    totalContributions: u32,
+    #[serde(default)]
+    weeks: Vec<ContributionWeek>,
+}
+
+#[derive(Deserialize, Default)]
+struct ContributionWeek {
+    #[serde(default)]
+    contributionDays: Vec<ContributionDay>,
+}
+
+#[derive(Deserialize, Default)]
+struct ContributionDay {
+    #[serde(default)]
+    contributionCount: u32,
+    #[serde(default)]
+    date: String,
 }
 
 #[derive(Deserialize, Default)]
@@ -204,9 +235,9 @@ fn fetch_github_data(out_dir: &str) {
         }
     };
 
-    let (pinned, all) = fetch_all(&token);
+    let (pinned, all, contribution_total, contribution_cells) = fetch_all(&token);
     match (&pinned, &all) {
-        (Ok(p), Ok(a)) => eprintln!("Fetched {} pinned and {} total repos from GitHub", p.len(), a.len()),
+        (Ok(p), Ok(a)) => eprintln!("Fetched {} pinned, {} total repos, {} contributions from GitHub", p.len(), a.len(), contribution_total),
         _ => {}
     }
 
@@ -228,14 +259,22 @@ fn fetch_github_data(out_dir: &str) {
             code.push_str(&format_repo(repo));
         }
     }
+    code.push_str("];\n\n");
+
+    code.push_str(&format!("pub const CONTRIBUTION_TOTAL: u32 = {contribution_total};\n"));
+    code.push_str("pub const CONTRIBUTION_CELLS: &[ContributionCell] = &[\n");
+    for (level, count, date) in &contribution_cells {
+        let d = escape_rust_string(date);
+        code.push_str(&format!("    ContributionCell {{ level: {level}, count: {count}, date: \"{d}\" }},\n"));
+    }
     code.push_str("];\n");
 
     fs::write(&dest, code).unwrap();
 }
 
-fn fetch_all(token: &str) -> (Result<Vec<RepoData>, String>, Result<Vec<RepoData>, String>) {
+fn fetch_all(token: &str) -> (Result<Vec<RepoData>, String>, Result<Vec<RepoData>, String>, u32, Vec<(u8, u32, String)>) {
     let query = format!(
-        r#"query($login: String!) {{ user(login: $login) {{ pinnedItems(first: 6, types: REPOSITORY) {{ nodes {{ ... on Repository {{ name description url homepageUrl stargazerCount primaryLanguage {{ name color }} repositoryTopics(first: 10) {{ nodes {{ topic {{ name }} }} }} defaultBranchRef {{ target {{ ... on Commit {{ history {{ totalCount }} }} }} }} }} }} }} repositories(first: 100, orderBy: {{field: PUSHED_AT, direction: DESC}}, affiliations: [OWNER]) {{ nodes {{ name description url homepageUrl stargazerCount primaryLanguage {{ name color }} repositoryTopics(first: 10) {{ nodes {{ topic {{ name }} }} }} defaultBranchRef {{ target {{ ... on Commit {{ committedDate history {{ totalCount }} }} }} }} isFork isPrivate }} }} }} }}"#,
+        r#"query($login: String!) {{ user(login: $login) {{ pinnedItems(first: 6, types: REPOSITORY) {{ nodes {{ ... on Repository {{ name description url homepageUrl stargazerCount primaryLanguage {{ name color }} repositoryTopics(first: 10) {{ nodes {{ topic {{ name }} }} }} defaultBranchRef {{ target {{ ... on Commit {{ history {{ totalCount }} }} }} }} }} }} }} repositories(first: 100, orderBy: {{field: PUSHED_AT, direction: DESC}}, affiliations: [OWNER]) {{ nodes {{ name description url homepageUrl stargazerCount primaryLanguage {{ name color }} repositoryTopics(first: 10) {{ nodes {{ topic {{ name }} }} }} defaultBranchRef {{ target {{ ... on Commit {{ committedDate history {{ totalCount }} }} }} }} isFork isPrivate }} }} contributionsCollection {{ contributionCalendar {{ totalContributions weeks {{ contributionDays {{ contributionCount date }} }} }} }} }} }}"#,
     );
 
     let body = serde_json::json!({
@@ -253,7 +292,7 @@ fn fetch_all(token: &str) -> (Result<Vec<RepoData>, String>, Result<Vec<RepoData
         Err(e) => {
             let msg = format!("GraphQL request failed: {e}");
             eprintln!("cargo:warning={msg}");
-            return (Err(msg.clone()), Err(msg));
+            return (Err(msg.clone()), Err(msg), 0, vec![]);
         }
     };
 
@@ -262,7 +301,7 @@ fn fetch_all(token: &str) -> (Result<Vec<RepoData>, String>, Result<Vec<RepoData
         Err(e) => {
             let msg = format!("GraphQL parse failed: {e}");
             eprintln!("cargo:warning={msg}");
-            return (Err(msg.clone()), Err(msg));
+            return (Err(msg.clone()), Err(msg), 0, vec![]);
         }
     };
 
@@ -271,7 +310,7 @@ fn fetch_all(token: &str) -> (Result<Vec<RepoData>, String>, Result<Vec<RepoData
         None => {
             let msg = "No user data in GraphQL response".to_string();
             eprintln!("cargo:warning={msg}");
-            return (Err(msg.clone()), Err(msg));
+            return (Err(msg.clone()), Err(msg), 0, vec![]);
         }
     };
 
@@ -290,7 +329,38 @@ fn fetch_all(token: &str) -> (Result<Vec<RepoData>, String>, Result<Vec<RepoData
         }
     });
 
-    (Ok(pinned), Ok(all))
+    let cal = &user.contributionsCollection.contributionCalendar;
+    let contribution_total = cal.totalContributions;
+    let contribution_cells: Vec<(u8, u32, String)> = cal.weeks.iter()
+        .flat_map(|w| &w.contributionDays)
+        .map(|d| (contribution_level(d.contributionCount), d.contributionCount, format_contribution_date(&d.date)))
+        .take(52 * 7)
+        .collect();
+
+    (Ok(pinned), Ok(all), contribution_total, contribution_cells)
+}
+
+fn contribution_level(count: u32) -> u8 {
+    match count {
+        0 => 0,
+        1..=9 => 1,
+        10..=19 => 2,
+        20..=29 => 3,
+        _ => 4,
+    }
+}
+
+fn format_contribution_date(iso: &str) -> String {
+    if iso.len() < 10 { return iso.to_string(); }
+    let month = match &iso[5..7] {
+        "01" => "Jan", "02" => "Feb", "03" => "Mar", "04" => "Apr",
+        "05" => "May", "06" => "Jun", "07" => "Jul", "08" => "Aug",
+        "09" => "Sep", "10" => "Oct", "11" => "Nov", "12" => "Dec",
+        _ => "",
+    };
+    let year = &iso[0..4];
+    let day = &iso[8..10];
+    format!("{month} {day}, {year}")
 }
 
 fn graphql_to_repo(r: GraphQLRepo) -> RepoData {

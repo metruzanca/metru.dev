@@ -354,6 +354,9 @@
   .table {
     display: table;
   }
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
   .size-1\.5 {
     width: calc(var(--spacing) * 1.5);
     height: calc(var(--spacing) * 1.5);
@@ -566,6 +569,9 @@
   }
   .gap-16 {
     gap: calc(var(--spacing) * 16);
+  }
+  .gap-\[2px\] {
+    gap: 2px;
   }
   .gap-px {
     gap: 1px;
