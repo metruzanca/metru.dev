@@ -1,19 +1,20 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::{GitBranchIcon, AtSignIcon, MailIcon, Gamepad2Icon};
+use crate::components::ui::icons::{GitBranchIcon, XIcon, MailIcon, LinkedInIcon};
 use super::section_heading::PortfolioSectionHeading;
 
-struct Channel {
-    label: &'static str,
-    handle: &'static str,
-    href: &'static str,
+struct Channel<'a> {
+    label: &'a str,
+    handle: &'a str,
+    href: &'a str,
+    is_mail: bool,
 }
 
 const CHANNELS: &[Channel] = &[
-    Channel { label: "github", handle: "@sam", href: "https://github.com" },
-    Channel { label: "x", handle: "@sam", href: "https://x.com" },
-    Channel { label: "twitch", handle: "@sam_dev", href: "https://twitch.tv" },
-    Channel { label: "email", handle: "sam@dev.io", href: "mailto:sam@dev.io" },
+    Channel { label: "github", handle: "@metruzanca", href: "https://github.com/metruzanca", is_mail: false },
+    Channel { label: "x", handle: "@metruzanca", href: "https://x.com/metruzanca", is_mail: false },
+    Channel { label: "linkedin", handle: "@samuele-zanca", href: "https://linkedin.com/in/samuele-zanca", is_mail: false },
+    Channel { label: "email", handle: "sam(at)zanca.dev", href: "", is_mail: true },
 ];
 
 #[component]
@@ -37,31 +38,39 @@ pub fn PortfolioContact() -> Element {
                      side project. Reach out on any channel below."
                 }
 
-                div { class: "mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4",
-                    {render_channel(0, CHANNELS)}
-                    {render_channel(1, CHANNELS)}
-                    {render_channel(2, CHANNELS)}
-                    {render_channel(3, CHANNELS)}
+                div { class: "mt-6 flex flex-wrap gap-6",
+                    for (i, ch) in CHANNELS.iter().enumerate() {
+                        if ch.is_mail {
+                            div { class: "group flex flex-col gap-1.5",
+                                div { class: "flex items-center gap-2",
+                                    {channel_icon(i)}
+                                    span { class: "font-mono text-xs uppercase tracking-widest text-muted-foreground",
+                                        "{ch.label}"
+                                    }
+                                }
+                                span { class: "font-mono text-xs text-foreground",
+                                    "{ch.handle}"
+                                }
+                            }
+                        } else {
+                            a {
+                                class: "group flex flex-col gap-1.5",
+                                href: "{ch.href}",
+                                target: "_blank",
+                                rel: "noreferrer",
+                                div { class: "flex items-center gap-2",
+                                    {channel_icon(i)}
+                                    span { class: "font-mono text-xs uppercase tracking-widest text-muted-foreground",
+                                        "{ch.label}"
+                                    }
+                                }
+                                span { class: "font-mono text-xs text-foreground transition-colors group-hover:text-accent",
+                                    "{ch.handle}"
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-        }
-    }
-}
-
-fn render_channel(i: usize, channels: &[Channel]) -> Element {
-    let ch = &channels[i];
-    rsx! {
-        a {
-            class: "group flex flex-col gap-2 bg-card p-4 transition-colors hover:bg-muted/40",
-            href: "{ch.href}",
-            target: "_blank",
-            rel: "noreferrer",
-            {channel_icon(i)}
-            span { class: "font-mono text-xs uppercase tracking-widest text-muted-foreground",
-                "{ch.label}"
-            }
-            span { class: "truncate font-mono text-xs text-foreground",
-                "{ch.handle}"
             }
         }
     }
@@ -69,9 +78,9 @@ fn render_channel(i: usize, channels: &[Channel]) -> Element {
 
 fn channel_icon(i: usize) -> Element {
     match i {
-        0 => rsx! { GitBranchIcon { class: "size-4 text-muted-foreground transition-colors group-hover:text-primary" } },
-        1 => rsx! { AtSignIcon { class: "size-4 text-muted-foreground transition-colors group-hover:text-primary" } },
-        2 => rsx! { Gamepad2Icon { class: "size-4 text-muted-foreground transition-colors group-hover:text-primary" } },
-        _ => rsx! { MailIcon { class: "size-4 text-muted-foreground transition-colors group-hover:text-primary" } },
+        0 => rsx! { GitBranchIcon { class: "size-4 text-muted-foreground" } },
+        1 => rsx! { XIcon { class: "size-4 text-muted-foreground" } },
+        2 => rsx! { LinkedInIcon { class: "size-4 text-muted-foreground" } },
+        _ => rsx! { MailIcon { class: "size-4 text-muted-foreground" } },
     }
 }
