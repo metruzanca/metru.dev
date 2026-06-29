@@ -309,31 +309,30 @@ fn fetch_all(
         r#"query($login: String!) {{ user(login: $login) {{ pinnedItems(first: 6, types: REPOSITORY) {{ nodes {{ ... on Repository {{ name description url homepageUrl stargazerCount primaryLanguage {{ name color }} repositoryTopics(first: 10) {{ nodes {{ topic {{ name }} }} }} defaultBranchRef {{ target {{ ... on Commit {{ history {{ totalCount }} }} }} }} }} }} }} repositories(first: 100, orderBy: {{field: PUSHED_AT, direction: DESC}}, affiliations: [OWNER]) {{ nodes {{ name description url homepageUrl stargazerCount primaryLanguage {{ name color }} repositoryTopics(first: 10) {{ nodes {{ topic {{ name }} }} }} defaultBranchRef {{ target {{ ... on Commit {{ committedDate history {{ totalCount }} }} }} }} isFork isPrivate }} }} contributionsCollection {{ contributionCalendar {{ totalContributions weeks {{ contributionDays {{ contributionCount date }} }} }} }} }} }}"#,
     );
 
-    let body = serde_json::json!({
-        "query": query,
-        "variables": { "login": USERNAME }
-    });
+    let parsed: GraphQLResponse = {
+        let rt = tokio::runtime::Runtime::new().expect("Failed to create tokio runtime");
+        let token = token.to_string();
+        match rt.block_on(async {
+            let octocrab = octocrab::OctocrabBuilder::new()
+                .personal_token(token)
+                .build()
+                .map_err(|e| format!("Failed to build octocrab client: {e}"))?;
 
-    let resp = match ureq::post("https://api.github.com/graphql")
-        .set("Authorization", &format!("Bearer {token}"))
-        .set("Content-Type", "application/json")
-        .set("User-Agent", "metru-dev-build")
-        .send_json(&body)
-    {
-        Ok(r) => r,
-        Err(e) => {
-            let msg = format!("GraphQL request failed: {e}");
-            eprintln!("cargo:warning={msg}");
-            return (Err(msg.clone()), Err(msg), 0, vec![]);
-        }
-    };
+            let json: serde_json::Value = octocrab
+                .graphql(&serde_json::json!({
+                    "query": query,
+                    "variables": { "login": USERNAME }
+                }))
+                .await
+                .map_err(|e| format!("GraphQL request failed: {e}"))?;
 
-    let parsed: GraphQLResponse = match resp.into_json() {
-        Ok(r) => r,
-        Err(e) => {
-            let msg = format!("GraphQL parse failed: {e}");
-            eprintln!("cargo:warning={msg}");
-            return (Err(msg.clone()), Err(msg), 0, vec![]);
+            serde_json::from_value(json).map_err(|e| format!("GraphQL parse failed: {e}"))
+        }) {
+            Ok(p) => p,
+            Err(msg) => {
+                eprintln!("cargo:warning={msg}");
+                return (Err(msg.clone()), Err(msg), 0, vec![]);
+            }
         }
     };
 
