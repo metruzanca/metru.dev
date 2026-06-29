@@ -1,0 +1,26 @@
+- [ ] Whitewind integration
+- [ ] Whitewind/ATProto comments
+- [ ] ATProto Guestbook
+- [ ] Site Visitors
+- [ ] Command Palette
+- [ ] Labs
+  - [ ] File conversion utilities
+  - [ ] Color picker
+  - [ ] Minecraft Wordle
+  - [ ] CSS Playground inspired by https://x.com/jh3yy
+- [ ] Improvement: Better Motion, view transitions.
+- [ ] Design system page improvements
+- [ ] Codeblock improvements (this thing is awesome https://sugar-high.vercel.app)
+- [ ] Music Page (lastfm)
+- [ ] Watched Page (Trakt)
+- [ ] Better support for wider screen resolutions
+- [ ] MedalTV clips
+- [ ] "gallery" or something, for random stuff like: my CBS Mornings interviews [Clip1](https://youtu.be/EmO6dBcqQ2w?t=52) & [clip2](https://youtu.be/EmO6dBcqQ2w?t=294).
+- [ ] A "how I work" page that includes my development philosophies
+  - [Simplicity, Please](https://www.infoq.com/articles/simplicity-manifesto-development/)
+  - [No Hello Club](https://nohello.club/)
+  - [37 signals](https://37signals.com/)
+  - [Software Craftsmanship](https://manifesto.softwarecraftsmanship.org/)
+  - [Agile](https://agilemanifesto.org/)
+- [ ] A Gear page
+- [ ]
