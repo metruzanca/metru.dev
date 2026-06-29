@@ -66,6 +66,19 @@ fn App() -> Element {
         document::Meta { name: "color-scheme", content: "dark" }
         document::Meta { name: "theme-color", content: "#0c0a1f" }
 
+        // Open Graph
+        document::Meta { property: "og:title", content: "Sam Zanca — Full-Stack Engineer" }
+        document::Meta { property: "og:description", content: "Building fast, reliable products with Rust and modern web technologies." }
+        document::Meta { property: "og:type", content: "website" }
+        document::Meta { property: "og:url", content: "https://metru.dev" }
+        document::Meta { property: "og:image", content: "https://metru.dev/assets/synthwave-horizon.png" }
+
+        // Twitter Card
+        document::Meta { name: "twitter:card", content: "summary_large_image" }
+        document::Meta { name: "twitter:title", content: "Sam Zanca — Full-Stack Engineer" }
+        document::Meta { name: "twitter:description", content: "Building fast, reliable products with Rust and modern web technologies." }
+        document::Meta { name: "twitter:image", content: "https://metru.dev/assets/synthwave-horizon.png" }
+
         Router::<Route> {}
     }
 }
