@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gear page
 - Runtime data fetching and caching for blog posts, repositories, and lastfm stats.
 - Integrated [umami analytics](https://github.com/umami-software/api-client) data for transparent page views
+- Last.fm link on now playing/last played music page cards
+- "Last played" label on music page when nothing is currently playing
 
 ## [0.1.1] - 2026-06-29
 

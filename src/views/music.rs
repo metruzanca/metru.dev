@@ -178,7 +178,21 @@ fn MusicContent(data: lastfm::NowPlayingData) -> Element {
                                     "{track.album.text}"
                                 }
                             }
+
+                            a {
+                                class: "inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-accent transition-colors mt-2",
+                                href: "{track.url}",
+                                target: "_blank",
+                                rel: "noreferrer",
+                                "\u{2197} open on last.fm"
+                            }
                         } else if let Some(ref track) = data.recent_tracks.first() {
+                            div { class: "flex items-center gap-2 mb-1",
+                                span { class: "font-mono text-[0.7rem] uppercase tracking-widest text-muted-foreground",
+                                    "last played"
+                                }
+                            }
+
                             h3 { class: "text-2xl font-bold text-foreground truncate",
                                 "{track.name}"
                             }
@@ -189,6 +203,14 @@ fn MusicContent(data: lastfm::NowPlayingData) -> Element {
                                 p { class: "mt-1 font-mono text-sm text-muted-foreground",
                                     "{track.album.text}"
                                 }
+                            }
+
+                            a {
+                                class: "inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-accent transition-colors mt-2",
+                                href: "{track.url}",
+                                target: "_blank",
+                                rel: "noreferrer",
+                                "\u{2197} open on last.fm"
                             }
                         }
                     }
