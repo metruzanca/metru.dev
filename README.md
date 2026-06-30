@@ -9,8 +9,8 @@ Personal porfolio built with [Dioxus 0.7](https://dioxuslabs.com) and with a Syn
 The site is a **Dioxus fullstack** app — Rust on both client and server. At build time:
 
 - **Blog posts** are read from `blog/*.md`, code-generated into Rust constants via `build.rs`, and rendered with syntax-highlighted MDX.
-- **GitHub data** (pinned repos, all public repos, contribution graph) is fetched from the GitHub GraphQL API using `octocrab` and baked into the binary. Requires a `GITHUB_TOKEN` at build time.
-- **Last.fm** data is fetched at request time via server functions using the Last.fm API. The `/music` page shows your currently playing track, recent scrobbles, total and daily play counts, and a waveform visualizer. The landing page includes a now-playing card with album art color extraction done server-side using the `image` crate. Requires `LASTFM_API_KEY` and `LASTFM_USERNAME` env vars at runtime.
+- **GitHub data** (pinned repos, all public repos, contribution graph) is fetched from the GitHub GraphQL API using `octocrab` and baked into the binary.
+- **Last.fm** data is fetched at request time via server functions using the Last.fm API. The `/music` page shows your currently playing track, recent scrobbles, total and daily play counts, and a waveform visualizer. The landing page includes a now-playing card with album art color extraction done server-side using the `image` crate.
 
 At runtime the server renders pages via Dioxus SSR and hydrates them on the client.
 
