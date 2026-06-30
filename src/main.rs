@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use components::layout::SiteLayout;
-use views::{BlogList, BlogPost, DesignSystem, Landing, Music, ProjectsList, ResumePage};
+use views::{BlogList, BlogPost, DesignSystem, HowIWork, Landing, Music, ProjectsList, ResumePage};
 
 mod blog;
 mod components;
@@ -24,6 +24,8 @@ enum Route {
         BlogPost { slug: String },
         #[route("/music")]
         Music {},
+        #[route("/how-i-work")]
+        HowIWork {},
     #[route("/design-system")]
     DesignSystem {},
     #[route("/resume")]
