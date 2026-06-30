@@ -81,6 +81,14 @@ fn App() -> Element {
         document::Meta { name: "twitter:description", content: "Building fast, reliable products with Rust and modern web technologies." }
         document::Meta { name: "twitter:image", content: "https://metru.dev/assets/synthwave-horizon.png" }
 
+        // Umami – Privacy-Focused Web Analytics
+        document::Script {
+            defer: true,
+            src: "https://umami-production-6edd.up.railway.app/script.js",
+            r#type: "text/javascript",
+            "data-website-id": "b3d56abc-c1d1-4921-8372-36ab2e5abc7d",
+        }
+
         Router::<Route> {}
     }
 }

@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "How I Work" page with development philosophies
 - Gear page
 - Runtime data fetching for blog posts and repositories
+- Integrated [umami analytics](https://github.com/umami-software/api-client) data for transparent page views
 
 ## [0.1.0] - 2026-06-29
 
