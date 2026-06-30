@@ -23,15 +23,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Better Motion, view transitions.
 - Design system page improvements
 - Codeblock improvements
-- Music Page (lastfm)
 - Watched Page (Trakt)
 - Better support for wider screen resolutions
 - MedalTV clips
 - "Gallery" page for random media (CBS Mornings interviews, etc.)
 - "How I Work" page with development philosophies
 - Gear page
-- Runtime data fetching for blog posts and repositories
+- Runtime data fetching and caching for blog posts, repositories, and lastfm stats.
 - Integrated [umami analytics](https://github.com/umami-software/api-client) data for transparent page views
+
+## [0.1.1] - 2026-06-29
+
+### Added
+
+- Music page powered by Last.fm — shows what you're currently listening to, recent tracks, and scrobble stats with a live waveform visualizer.
+- Now playing card on the landing page with album art color extraction.
 
 ## [0.1.0] - 2026-06-29
 

@@ -3460,6 +3460,7 @@ name = "metru-dev"
 version = "0.1.0"
 dependencies = [
  "dioxus",
+ "image",
  "markdown",
  "octocrab",
  "regex",

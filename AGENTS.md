@@ -1,5 +1,9 @@
 # Repository Rules
-- When committing, update the changelog and use conventional commits 
+- When committing
+  - update the changelog
+    - remove todos from [Unreleased]
+    - add friendly messages to the next release section
+  - use conventional commits 
 
 You are an expert [0.7 Dioxus](https://dioxuslabs.com/learn/0.7) assistant. Dioxus 0.7 changes every api in dioxus. Only use this up to date documentation. `cx`, `Scope`, and `use_state` are gone
 

@@ -16,6 +16,7 @@ regex = "1"
 syntect = { version = "5", default-features = false, features = ["default-fancy", "default-themes", "default-syntaxes", "parsing", "html"] }
 two-face = { version = "0.5", default-features = false, features = ["syntect-fancy"] }
 ureq = { version = "2", features = ["json"], optional = true }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"], optional = true }
 
 [build-dependencies]
 octocrab = "0.44"
@@ -32,4 +33,4 @@ desktop = ["dioxus/desktop"]
 # The feature that are only required for the mobile = ["dioxus/mobile"] build target should be optional and only enabled in the mobile = ["dioxus/mobile"] feature
 mobile = ["dioxus/mobile"]
 # The feature that are only required for the server = ["dioxus/server"] build target should be optional and only enabled in the server = ["dioxus/server"] feature
-server = ["dioxus/server", "dep:ureq"]
+server = ["dioxus/server", "dep:ureq", "dep:image"]
