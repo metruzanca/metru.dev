@@ -6,6 +6,7 @@ pub mod toggle;
 pub mod card;
 pub mod section_heading;
 pub mod panel;
+pub mod command_palette;
 
 pub use button::*;
 pub use badge::*;
@@ -14,3 +15,4 @@ pub use toggle::*;
 pub use card::*;
 pub use section_heading::*;
 pub use panel::*;
+pub use command_palette::*;

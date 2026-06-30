@@ -3471,6 +3471,8 @@ dependencies = [
  "tokio",
  "two-face",
  "ureq",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]

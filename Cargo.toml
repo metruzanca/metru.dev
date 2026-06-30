@@ -18,6 +18,10 @@ two-face = { version = "0.5", default-features = false, features = ["syntect-fan
 ureq = { version = "2", features = ["json"], optional = true }
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"], optional = true }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3", features = ["Window", "Document", "EventTarget", "KeyboardEvent"] }
+wasm-bindgen = "0.2"
+
 [build-dependencies]
 octocrab = "0.44"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

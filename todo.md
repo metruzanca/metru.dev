@@ -1,4 +1,3 @@
-- [ ] Command Palette
 - [ ] Blog posts with markdown support.
 - [ ] Whitewind integration
 - [ ] Whitewind/ATProto comments
