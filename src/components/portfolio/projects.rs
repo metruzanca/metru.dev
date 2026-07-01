@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::components::ui::icons::GitBranchIcon;
 use crate::github::{self, GithubRepo};
-use super::section_heading::{PortfolioSectionHeading, SectionAction};
+use super::section_heading::SectionAction;
 
 fn tag_accent(index: usize) -> &'static str {
     if index % 2 == 0 { "primary" } else { "cyan" }
@@ -33,13 +33,12 @@ pub fn PortfolioProjects() -> Element {
 
     rsx! {
         section { id: "projects", class: "px-4 py-12",
-            PortfolioSectionHeading {
-                index: "01".to_string(),
-                label: "building".to_string(),
-                action: Some(SectionAction {
-                    label: "all projects".to_string(),
-                    href: "/projects".to_string(),
-                }),
+            div { class: "mb-6 flex items-center justify-end border-b border-border pb-2",
+                a {
+                    class: "font-mono text-xs text-muted-foreground transition-colors hover:text-accent hover:text-glow-cyan",
+                    href: "/projects",
+                    "all projects \u{2192}"
+                }
             }
 
             div { class: "grid grid-cols-1 gap-4 sm:grid-cols-2",
@@ -52,7 +51,7 @@ pub fn PortfolioProjects() -> Element {
 }
 
 #[component]
-fn ProjectCard(repo: GithubRepo) -> Element {
+pub fn ProjectCard(repo: GithubRepo) -> Element {
     let star_count = if repo.stars >= 1000 {
         format!("{:.1}k", repo.stars as f64 / 1000.0)
     } else {

@@ -1,5 +1,7 @@
 # Repository Rules
-- When committing update the changelog and use conventional commits 
+- Simplicity and avoid hasty abstractions.
+- When committing update the changelog and use conventional commits.
+- To avoid spam, never include my phone number and censor email as `sam(at)zanca.dev`.
 
 You are an expert [0.7 Dioxus](https://dioxuslabs.com/learn/0.7) assistant. Dioxus 0.7 changes every api in dioxus. Only use this up to date documentation. `cx`, `Scope`, and `use_state` are gone
 

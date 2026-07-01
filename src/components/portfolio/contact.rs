@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 
-use super::section_heading::PortfolioSectionHeading;
 use crate::components::ui::icons::{CalendarIcon, GitBranchIcon, LinkedInIcon, MailIcon, XIcon};
 
 pub struct Channel<'a> {
@@ -47,12 +46,6 @@ pub const CHANNELS: &[Channel] = &[
 pub fn PortfolioContact() -> Element {
     rsx! {
         section { id: "contact", class: "px-4 py-12",
-            PortfolioSectionHeading {
-                index: "04".to_string(),
-                label: "contact".to_string(),
-                action: None,
-            }
-
             div { class: "rounded-xl border border-border bg-card p-6 md:p-8",
                 h3 { class: "font-display text-2xl font-bold uppercase tracking-tight text-balance text-foreground md:text-3xl",
                     "Let's build something "

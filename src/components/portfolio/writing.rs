@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::blog;
-use super::section_heading::{PortfolioSectionHeading, SectionAction};
+
 
 #[component]
 pub fn PortfolioWriting() -> Element {
@@ -9,13 +9,12 @@ pub fn PortfolioWriting() -> Element {
 
     rsx! {
         section { id: "writing", class: "px-4 py-12",
-            PortfolioSectionHeading {
-                index: "02".to_string(),
-                label: "writing".to_string(),
-                action: Some(SectionAction {
-                    label: "view all".to_string(),
-                    href: "/blog".to_string(),
-                }),
+            div { class: "mb-6 flex items-center justify-end border-b border-border pb-2",
+                a {
+                    class: "font-mono text-xs text-muted-foreground transition-colors hover:text-accent hover:text-glow-cyan",
+                    href: "/blog",
+                    "view all \u{2192}"
+                }
             }
 
             ul { class: "flex flex-col",

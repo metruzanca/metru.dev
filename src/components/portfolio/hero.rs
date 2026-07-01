@@ -28,12 +28,23 @@ pub fn PortfolioHero() -> Element {
                     "React \u{b7} TypeScript \u{b7} Go \u{b7} Rust"
                 }
             }
-            a {
-                class: "mt-5 inline-flex items-center gap-2 font-mono text-sm rounded-lg border border-accent/30 bg-accent/5 px-4 py-2 text-accent transition-all hover:border-accent/60 hover:bg-accent/10 hover:text-glow-cyan",
-                href: "/how-i-work",
-                "Read how I work"
-                span { class: "text-accent/60", "\u{2192}" }
+
+            p { class: "mt-5 font-mono text-sm text-muted-foreground",
+                "Learn more "
+                a {
+                    class: "text-accent hover:underline hover:text-glow-cyan transition-colors",
+                    href: "/about",
+                    "about me"
+                }
+                " or read about my "
+                a {
+                    class: "text-accent hover:underline hover:text-glow-cyan transition-colors",
+                    href: "/how-i-work",
+                    "working style"
+                }
+                "."
             }
+
         }
     }
 }

@@ -1,12 +1,13 @@
 use dioxus::prelude::*;
 
 use crate::components::portfolio::{CHANNELS, Channel};
+use crate::utils;
 
 const RESUME_URL: &str =
     "https://gist.githubusercontent.com/metruzanca/751361e5ba58ad06f361ebd430ae6e10/raw/resume.json";
 
 #[server]
-async fn fetch_resume_server() -> Result<ResumeData, ServerFnError> {
+pub async fn fetch_resume_server() -> Result<ResumeData, ServerFnError> {
     let body = ureq::get(RESUME_URL)
         .call()
         .map_err(|e| ServerFnError::new(e.to_string()))?
@@ -16,73 +17,73 @@ async fn fetch_resume_server() -> Result<ResumeData, ServerFnError> {
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct ResumeData {
-    basics: Basics,
+pub struct ResumeData {
+    pub basics: Basics,
     #[serde(default)]
-    work: Vec<Work>,
+    pub work: Vec<Work>,
     #[serde(default)]
-    skills: Vec<Skill>,
+    pub skills: Vec<Skill>,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct Basics {
-    name: String,
-    label: String,
+pub struct Basics {
+    pub name: String,
+    pub label: String,
     #[serde(default)]
-    email: String,
+    pub email: String,
     #[serde(default)]
-    phone: String,
+    pub phone: String,
     #[serde(default)]
-    url: String,
+    pub url: String,
     #[serde(default)]
-    location: Option<Location>,
+    pub location: Option<Location>,
     #[serde(default)]
-    profiles: Vec<Profile>,
+    pub profiles: Vec<Profile>,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct Location {
+pub struct Location {
     #[serde(default)]
-    city: String,
+    pub city: String,
     #[serde(default)]
     #[serde(rename = "countryCode")]
-    country_code: String,
+    pub country_code: String,
     #[serde(default)]
-    region: String,
+    pub region: String,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct Profile {
-    network: String,
+pub struct Profile {
+    pub network: String,
     #[serde(default)]
-    username: String,
+    pub username: String,
     #[serde(default)]
-    url: String,
+    pub url: String,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct Work {
-    name: String,
-    position: String,
+pub struct Work {
+    pub name: String,
+    pub position: String,
     #[serde(default)]
     #[serde(rename = "startDate")]
-    start_date: String,
+    pub start_date: String,
     #[serde(default)]
     #[serde(rename = "endDate")]
-    end_date: String,
+    pub end_date: String,
     #[serde(default)]
-    url: String,
+    pub url: String,
     #[serde(default)]
-    location: Option<String>,
+    pub location: Option<String>,
     #[serde(default)]
-    highlights: Vec<String>,
+    pub highlights: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-struct Skill {
-    name: String,
+pub struct Skill {
+    pub name: String,
     #[serde(default)]
-    keywords: Vec<String>,
+    pub keywords: Vec<String>,
 }
 
 const PRINT_CSS: &str = r#"
@@ -300,7 +301,7 @@ fn WorkSection(work: Vec<Work>) -> Element {
                                 }
                             }
                             span { class: "font-mono text-xs text-muted-foreground shrink-0",
-                                "{format_date_range(&job.start_date, &job.end_date)}"
+                                "{utils::datetime::format_date_range(&job.start_date, &job.end_date)}"
                             }
                         }
 
@@ -354,12 +355,6 @@ fn SkillsSection(skills: Vec<Skill>) -> Element {
     }
 }
 
-fn format_date_range(start: &str, end: &str) -> String {
-    let start_fmt = format_short_date(start);
-    let end_fmt = if end.is_empty() { "Present".to_string() } else { format_short_date(end) };
-    format!("{start_fmt} \u{2013} {end_fmt}")
-}
-
 fn format_channel_label(ch: &Channel) -> String {
     let url = ch.href.trim_start_matches("https://").trim_start_matches("http://");
     let url = url.trim_start_matches("www.");
@@ -379,25 +374,4 @@ fn format_channel_label(ch: &Channel) -> String {
     }
 }
 
-fn format_short_date(iso: &str) -> String {
-    if iso.len() < 7 {
-        return iso.to_string();
-    }
-    let month = match &iso[5..7] {
-        "01" => "Jan",
-        "02" => "Feb",
-        "03" => "Mar",
-        "04" => "Apr",
-        "05" => "May",
-        "06" => "Jun",
-        "07" => "Jul",
-        "08" => "Aug",
-        "09" => "Sep",
-        "10" => "Oct",
-        "11" => "Nov",
-        "12" => "Dec",
-        _ => "",
-    };
-    let year = &iso[0..4];
-    format!("{month} {year}")
-}
+

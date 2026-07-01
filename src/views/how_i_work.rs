@@ -11,7 +11,7 @@ pub fn HowIWork() -> Element {
                 }
                 div { class: "mt-4 flex flex-wrap items-center gap-3 font-mono text-xs text-muted-foreground",
                     span { class: "rounded-md border border-border px-2 py-0.5",
-                        "version 1.0 \u{2014} June 2026"
+                        "Updated June 2026"
                     }
                 }
                 p { class: "mt-4 max-w-xl font-mono text-sm text-muted-foreground",
@@ -149,7 +149,6 @@ pub fn HowIWork() -> Element {
                         ul { class: "mt-2 list-disc pl-4 space-y-1.5 text-sm text-muted-foreground leading-relaxed",
                             li { "Before writing code, I clarify acceptance criteria. If it's not clear, I go ask. 5 minutes now saves a day of waste." }
                             li { "I prefer milestone-based work with defined scope. Smaller, shippable increments build trust and momentum." }
-                            li { "I stick to the top-right corner of the Impact/Effort matrix. High signal, low drag." }
                             li { "Every incident gets a postmortem with concrete follow-ups that turn into actual tickets." }
                         }
                     }
@@ -216,7 +215,7 @@ pub fn HowIWork() -> Element {
                             ("Simplicity, Please", "A manifesto for reducing complexity in software development.", "https://www.infoq.com/articles/simplicity-manifesto-development/"),
                             ("No Hello Club", "Skip the pleasantries and get to the point in chat.", "https://nohello.club/"),
                             ("37signals", "Opinionated takes on business, design, and staying small.", "https://37signals.com/"),
-                            ("Software Craftsmanship", "Raising the bar for professional software development.", "https://manifesto.softwarecraftsmanship.org/"),
+                            ("Software Craftsmanship", "Raising the bar for professional software development. (Signed in 2021)", "https://manifesto.softwarecraftsmanship.org/"),
                             ("Agile Manifesto", "The foundational document for agile software development.", "https://agilemanifesto.org/"),
                         ];
                         links.into_iter().map(|(title, description, url)| {

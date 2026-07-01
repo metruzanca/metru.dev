@@ -9,7 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- How I Work page — principles, process, tooling, collaboration notes, and inspiration links sourced from interview transcripts.
+- How I Work page with principles, process notes, tooling, collaboration guidelines, and inspiration links.
+- About page with personal story, work timeline, side projects, community involvement, and a collapsible crypto exit note.
+- Shared `utils/datetime` module for date formatting reused across pages.
+
+### Changed
+
+- Reordered nav links: About, How I Work, Projects, Blog, Resume, Music.
+- Landing page: removed numbered section headings, reordered sections (Projects first), replaced button CTA with inline sentence links.
+- Contact, Git Activity, and Music sections on landing page no longer render section headings.
+- Resume and About pages inlined date formatting calls to shared utility module.
 
 ## [0.1.2] - 2026-06-30
 

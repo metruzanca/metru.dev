@@ -1,3 +1,4 @@
+mod about;
 mod blog_list;
 mod blog_post;
 mod design_system;
@@ -7,6 +8,7 @@ mod music;
 mod projects_list;
 mod resume;
 
+pub use about::About;
 pub use blog_list::BlogList;
 pub use blog_post::BlogPost;
 pub use design_system::DesignSystem;

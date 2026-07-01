@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 
-use super::section_heading::PortfolioSectionHeading;
 use crate::github;
 
 const LEVEL_CLASSES: &[&str] = &[
@@ -48,12 +47,6 @@ pub fn GitActivity() -> Element {
 
     rsx! {
         section { id: "activity", class: "px-4 py-12",
-            PortfolioSectionHeading {
-                index: "03".to_string(),
-                label: "activity".to_string(),
-                action: None,
-            }
-
             div { class: "rounded-xl border border-border bg-card p-5",
                 div { class: "mb-4 flex flex-wrap items-baseline justify-between gap-2",
                     p { class: "text-sm text-foreground",

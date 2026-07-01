@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::components::ui::icons::{BlueSkyIcon, GitBranchIcon, XIcon};
 
-const LINKS: &[(&str, &str)] = &[("/how-i-work", "/how-i-work"), ("/projects", "/projects"), ("/blog", "/blog"), ("/resume", "/resume"), ("/music", "/music")];
+const LINKS: &[(&str, &str)] = &[("/about", "/about"), ("/how-i-work", "/how-i-work"), ("/projects", "/projects"), ("/blog", "/blog"), ("/resume", "/resume"), ("/music", "/music")];
 
 #[component]
 pub fn PortfolioNav() -> Element {
