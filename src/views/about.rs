@@ -91,6 +91,79 @@ pub fn About() -> Element {
             section { class: "mb-16",
                 h2 { class: "font-heading text-2xl font-bold tracking-tight text-foreground mb-6",
                     span { class: "text-accent text-glow-cyan", ">\u{00A0}" }
+                    "References"
+                }
+
+                p { class: "mb-6 font-mono text-sm text-muted-foreground",
+                    "What colleagues have said about working with me. "
+                    a {
+                        class: "text-accent hover:underline",
+                        href: "https://www.linkedin.com/in/samuele-zanca/details/recommendations/",
+                        target: "_blank",
+                        rel: "noreferrer",
+                        "See more on LinkedIn"
+                    }
+                    "."
+                }
+
+                div { class: "flex flex-col gap-4",
+                    div { class: "rounded-xl border border-border bg-card p-6",
+                        div { class: "flex items-start gap-4 mb-3",
+                            img {
+                                class: "size-10 rounded-full shrink-0",
+                                src: asset!("/assets/regina-wong-linkedin.jpg"),
+                                alt: "Regina Wong",
+                            }
+                            div {
+                                h3 { class: "font-heading text-sm font-semibold text-foreground",
+                                    "Regina Wong"
+                                }
+                                p { class: "font-mono text-xs text-muted-foreground mt-0.5",
+                                    "Software Engineer II at Chainalysis \u{00B7} June 2025"
+                                }
+                                p { class: "font-mono text-xs text-muted-foreground italic mt-0.5",
+                                    "Worked with Sam on the same team"
+                                }
+                            }
+                        }
+                        blockquote { class: "border-l-2 border-primary/40 pl-4",
+                            p { class: "text-sm text-muted-foreground leading-relaxed",
+                                "Sam has been an outstanding frontend engineer and consistently demonstrated strong ownership and collaboration. He excels at cross-functional communication \u{2014} always quick to respond with clear, thoughtful explanations. What sets him apart is how he goes beyond just answering questions, walking through where components live and are used in the codebase to help build shared understanding. His efforts to simplify and improve code readability reflect a strong commitment to maintainability. On top of that, Sam shows a clear passion for continuous learning and shares tools and resources that not only enhance his own skills but also inspire those around him."
+                            }
+                        }
+                    }
+
+                    div { class: "rounded-xl border border-border bg-card p-6",
+                        div { class: "flex items-start gap-4 mb-3",
+                            img {
+                                class: "size-10 rounded-full shrink-0",
+                                src: asset!("/assets/garrett-hughes-linkedin.jpg"),
+                                alt: "Garrett Hughes",
+                            }
+                            div {
+                                h3 { class: "font-heading text-sm font-semibold text-foreground",
+                                    "Garrett Hughes"
+                                }
+                                p { class: "font-mono text-xs text-muted-foreground mt-0.5",
+                                    "Full Stack Web Developer \u{00B7} January 2024"
+                                }
+                                p { class: "font-mono text-xs text-muted-foreground italic mt-0.5",
+                                    "Worked with Sam but at different companies"
+                                }
+                            }
+                        }
+                        blockquote { class: "border-l-2 border-primary/40 pl-4",
+                            p { class: "text-sm text-muted-foreground leading-relaxed",
+                                "Sam is one of the most talented developers I've had the pleasure of working with. I can count on one hand the number of times I've come to him with a problem where he hasn't been able to almost instantly give me a solid solution. He's constantly learning new things always sharing improved ways to write code. He would be a wonderful addition to any team and I would highly recommend him."
+                            }
+                        }
+                    }
+                }
+            }
+
+            section { class: "mb-16",
+                h2 { class: "font-heading text-2xl font-bold tracking-tight text-foreground mb-6",
+                    span { class: "text-accent text-glow-cyan", ">\u{00A0}" }
                     "Projects I've Built"
                 }
 

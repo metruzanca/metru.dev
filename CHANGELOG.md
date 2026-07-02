@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - How I Work page with principles, process notes, tooling, collaboration guidelines, and inspiration links.
-- About page with personal story, work timeline, side projects, community involvement, and a collapsible crypto exit note.
+- About page with personal story, work timeline, LinkedIn references, side projects, community involvement, and a collapsible crypto exit note.
 - Shared `utils/datetime` module for date formatting reused across pages.
 
 ### Changed
