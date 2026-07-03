@@ -33,6 +33,11 @@ pub fn HowIWork() -> Element {
                     }
                     ". This is a living document that describes how I operate\u{2014}it's context for teammates, not a prescription for how you should work."
                 }
+                p { class: "mt-2 font-mono text-xs text-muted-foreground",
+                    "Learn more "
+                    a { class: "text-accent hover:underline", href: "/about", "about me" }
+                    "."
+                }
             }
 
             section { class: "mb-16",

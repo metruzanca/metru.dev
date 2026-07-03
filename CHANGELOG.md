@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Desktop `/more` dropdown in nav consolidating `/how-i-work`, `/music`, and `/resume`.
+- Redundant `/home` link at start of desktop nav.
+- Mobile hamburger menu with all nav links and social icons.
+- Cross-links between About and How I Work pages.
 - Meta description tag for SEO.
 - `robots.txt` with sitemap reference.
 - `lang="en"` attribute on `<html>` element.

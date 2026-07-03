@@ -24,6 +24,11 @@ pub fn About() -> Element {
                 p { class: "mt-4 text-lg text-muted-foreground leading-relaxed",
                     "Since then I've worked across ad tech, restaurant platforms, and crypto compliance, wearing hats from frontend to backend to design systems to DevOps. I'm currently based in Jersey City, building things with Rust, Go, TypeScript, and React."
                 }
+                p { class: "mt-4 font-mono text-xs text-muted-foreground",
+                    "Read more about "
+                    a { class: "text-accent hover:underline", href: "/how-i-work", "how I work" }
+                    "."
+                }
             }
 
             section { class: "mb-16",
