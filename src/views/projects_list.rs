@@ -9,6 +9,9 @@ pub fn ProjectsList() -> Element {
 
     rsx! {
         main { class: "mx-auto max-w-3xl px-4 pb-12 pt-14 md:pt-20",
+            h1 { class: "mb-8 font-display text-3xl font-extrabold uppercase text-foreground md:text-4xl",
+                "Projects"
+            }
             div { class: "grid grid-cols-1 gap-4 sm:grid-cols-2",
                 for repo in repos {
                     ProjectCard { repo: *repo }

@@ -225,7 +225,7 @@ pub fn HowIWork() -> Element {
                                     href: "{url}",
                                     target: "_blank",
                                     rel: "noreferrer",
-                                    h4 { class: "font-mono text-sm font-semibold text-accent group-hover:underline",
+                                    h3 { class: "font-mono text-sm font-semibold text-accent group-hover:underline",
                                         "{title}"
                                     }
                                     p { class: "mt-1 text-sm text-muted-foreground leading-relaxed",

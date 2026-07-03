@@ -73,6 +73,11 @@ fn App() -> Element {
             href: "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Orbitron:wght@500;600;700;800;900&display=swap",
         }
 
+        document::Script {
+            r#type: "text/javascript",
+            "document.documentElement.lang = 'en';",
+        }
+        document::Meta { name: "description", content: "Sam Zanca — Full-stack engineer building fast, reliable products with Rust and modern web technologies. Portfolio, blog, and projects." }
         document::Meta { name: "color-scheme", content: "dark" }
         document::Meta { name: "theme-color", content: "#0c0a1f" }
 

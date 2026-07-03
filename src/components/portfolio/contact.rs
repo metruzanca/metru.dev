@@ -47,7 +47,7 @@ pub fn PortfolioContact() -> Element {
     rsx! {
         section { id: "contact", class: "px-4 py-12",
             div { class: "rounded-xl border border-border bg-card p-6 md:p-8",
-                h3 { class: "font-display text-2xl font-bold uppercase tracking-tight text-balance text-foreground md:text-3xl",
+                h2 { class: "font-display text-2xl font-bold uppercase tracking-tight text-balance text-foreground md:text-3xl",
                     "Let's build something "
                     span { class: "text-accent text-glow-cyan", "electric" }
                     "."

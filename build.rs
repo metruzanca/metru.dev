@@ -48,6 +48,11 @@ fn main() {
 
     println!("cargo:rerun-if-changed=blog/");
 
+    // Copy robots.txt to the public directory
+    let robots_src = format!("{manifest_dir}/robots.txt");
+    let _ = fs::copy(&robots_src, format!("{manifest_dir}/public/robots.txt"));
+    println!("cargo:rerun-if-changed=robots.txt");
+
     // Copy blog _assets into the public directory so Dioxus serves them
     let blog_assets_dir = format!("{manifest_dir}/blog/_assets");
     let dest_assets_dir = format!("{manifest_dir}/public/assets/blog");
