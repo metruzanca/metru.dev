@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::TriangleIcon;
+use ui::icons::TriangleIcon;
 
 const NAV: &[(&str, &[(&str, &str)])] = &[
     (

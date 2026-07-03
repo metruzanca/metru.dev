@@ -3113,6 +3113,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "lab-word-count"
+version = "0.1.0"
+dependencies = [
+ "dioxus",
+ "ui",
+]
+
+[[package]]
 name = "lazy-js-bundle"
 version = "0.7.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3461,6 +3469,7 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "image",
+ "lab-word-count",
  "markdown",
  "octocrab",
  "regex",
@@ -3470,6 +3479,7 @@ dependencies = [
  "syntect",
  "tokio",
  "two-face",
+ "ui",
  "ureq",
  "wasm-bindgen",
  "web-sys",
@@ -6066,6 +6076,13 @@ name = "typenum"
 version = "1.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
+
+[[package]]
+name = "ui"
+version = "0.1.0"
+dependencies = [
+ "dioxus",
+]
 
 [[package]]
 name = "unicase"

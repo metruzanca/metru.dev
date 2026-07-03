@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::MapPinIcon;
+use ui::icons::MapPinIcon;
 
 #[component]
 pub fn PortfolioHero() -> Element {

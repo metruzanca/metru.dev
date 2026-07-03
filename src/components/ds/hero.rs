@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::{PaletteIcon, TypeIcon, ComponentIcon, SparklesIcon};
+use ui::icons::{PaletteIcon, TypeIcon, ComponentIcon, SparklesIcon};
 
 const HERO_IMAGE: Asset = asset!("/assets/synthwave-horizon.png");
 

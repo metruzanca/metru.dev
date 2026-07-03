@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::components::portfolio::PortfolioNav;
-use crate::components::ui::CommandPalette;
+use crate::components::command_palette::CommandPalette;
 use crate::Route;
 
 #[component]

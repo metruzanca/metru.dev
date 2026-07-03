@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::button::{Button, ButtonVariant, ButtonSize};
-use crate::components::ui::icons::{SearchIcon, BookOpenIcon, CommandIcon};
+use ui::button::{Button, ButtonVariant, ButtonSize};
+use ui::icons::{SearchIcon, BookOpenIcon, CommandIcon};
 
 #[component]
 pub fn DsTopbar() -> Element {

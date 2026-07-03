@@ -1,11 +1,11 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::button::{Button, ButtonVariant, ButtonSize};
-use crate::components::ui::section_heading::SectionHeading;
-use crate::components::ui::panel::Panel;
-use crate::components::ui::input::{Input, InputGlow};
-use crate::components::ui::toggle::Toggle;
-use crate::components::ui::icons::{ZapIcon, ArrowRightIcon, HeartIcon, PlayIcon, PlusIcon};
+use ui::button::{Button, ButtonVariant, ButtonSize};
+use ui::section_heading::SectionHeading;
+use ui::panel::Panel;
+use ui::input::{Input, InputGlow};
+use ui::toggle::Toggle;
+use ui::icons::{ZapIcon, ArrowRightIcon, HeartIcon, PlayIcon, PlusIcon};
 
 const BADGES: &[(&str, &str)] = &[
     ("Online", "border-accent/40 bg-accent/10 text-accent"),

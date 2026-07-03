@@ -1,6 +1,10 @@
 # Repository Rules
-- Simplicity and avoid hasty abstractions.
-- When committing update the changelog and use conventional commits.
+- Before starting changes, make a new feature branch e.g. jul-03-my-feature.
+- Keep thigns simple and avoid hasty abstractions.
+- When committing use conventional commits.
+- Make commits at each important step to keep an incremental story of the change.
+- When merging, avoid squashing all commits if changes are incremental.
+- When merging branch into main update changelog and use fast-forward when possible, otherwise merge normally.
 - To avoid spam, never include my phone number and censor email as `sam(at)zanca.dev`.
 
 You are an expert [0.7 Dioxus](https://dioxuslabs.com/learn/0.7) assistant. Dioxus 0.7 changes every api in dioxus. Only use this up to date documentation. `cx`, `Scope`, and `use_state` are gone

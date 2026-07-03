@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::section_heading::SectionHeading;
+use ui::section_heading::SectionHeading;
 
 const SWATCHES: &[(&str, &str, &str, &str)] = &[
     ("Primary", "--primary", "bg-primary", "Neon Magenta"),

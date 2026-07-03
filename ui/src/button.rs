@@ -1,7 +1,5 @@
 use dioxus::prelude::*;
 
-use super::icons::*;
-
 #[derive(Clone, PartialEq)]
 pub enum ButtonVariant {
     Default,

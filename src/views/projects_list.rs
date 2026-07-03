@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::GitBranchIcon;
+use ui::icons::GitBranchIcon;
 use crate::github::{self, GithubRepo};
 
 #[component]

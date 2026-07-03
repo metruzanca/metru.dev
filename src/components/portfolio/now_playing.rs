@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::MusicNoteIcon;
+use ui::icons::MusicNoteIcon;
 use crate::lastfm::{self, Track};
 
 const BARS: usize = 30;

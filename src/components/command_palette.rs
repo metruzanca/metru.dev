@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::blog;
+use crate::labs;
 use crate::Route;
 
 #[derive(PartialEq, Clone)]
@@ -12,10 +13,10 @@ struct PageItem {
 }
 
 fn static_pages() -> Vec<PageItem> {
-    vec![
+    let mut pages = vec![
         PageItem {
             title: "Landing".into(),
-            description: "Portfolio overview — projects, writing, music".into(),
+            description: "Portfolio overview \u{2014} projects, writing, music".into(),
             url: "/".into(),
             section: "Navigation",
         },
@@ -29,6 +30,12 @@ fn static_pages() -> Vec<PageItem> {
             title: "Blog".into(),
             description: "Articles on Rust, web development, and technology".into(),
             url: "/blog".into(),
+            section: "Navigation",
+        },
+        PageItem {
+            title: "Labs".into(),
+            description: "Small tools, experiments, and utilities".into(),
+            url: "/labs".into(),
             section: "Navigation",
         },
         PageItem {
@@ -49,7 +56,18 @@ fn static_pages() -> Vec<PageItem> {
             url: "/resume".into(),
             section: "Navigation",
         },
-    ]
+    ];
+
+    for lab in labs::LABS {
+        pages.push(PageItem {
+            title: lab.meta.name.to_string(),
+            description: lab.meta.description.to_string(),
+            url: format!("/labs/{}", lab.meta.slug),
+            section: "Labs",
+        });
+    }
+
+    pages
 }
 
 fn all_pages() -> Vec<PageItem> {
@@ -126,12 +144,19 @@ pub fn CommandPalette(mut open: Signal<bool>) -> Element {
             "/" => { nav.push(Route::Landing {}); }
             "/projects" => { nav.push(Route::ProjectsList {}); }
             "/blog" => { nav.push(Route::BlogList {}); }
+            "/labs" => { nav.push(Route::LabsList {}); }
             "/music" => { nav.push(Route::Music {}); }
             "/design-system" => { nav.push(Route::DesignSystem {}); }
             "/resume" => { nav.push(Route::ResumePage {}); }
             u if u.starts_with("/blog/") => {
                 let slug = u.strip_prefix("/blog/").unwrap_or("");
                 nav.push(Route::BlogPost {
+                    slug: slug.to_string(),
+                });
+            }
+            u if u.starts_with("/labs/") => {
+                let slug = u.strip_prefix("/labs/").unwrap_or("");
+                nav.push(Route::LabPage {
                     slug: slug.to_string(),
                 });
             }

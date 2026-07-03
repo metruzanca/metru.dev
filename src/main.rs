@@ -1,11 +1,12 @@
 use dioxus::prelude::*;
 
 use components::layout::SiteLayout;
-use views::{About, BlogList, BlogPost, DesignSystem, HowIWork, Landing, Music, ProjectsList, ResumePage};
+use views::{About, BlogList, BlogPost, DesignSystem, HowIWork, LabPage, LabsList, Landing, Music, ProjectsList, ResumePage};
 
 mod blog;
 mod components;
 mod github;
+mod labs;
 mod lastfm;
 mod utils;
 mod views;
@@ -29,6 +30,10 @@ enum Route {
         HowIWork {},
         #[route("/about")]
         About {},
+        #[route("/labs")]
+        LabsList {},
+        #[route("/labs/:slug")]
+        LabPage { slug: String },
     #[route("/design-system")]
     DesignSystem {},
     #[route("/resume")]

@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::{CalendarIcon, GitBranchIcon, LinkedInIcon, MailIcon, XIcon};
+use ui::icons::{CalendarIcon, GitBranchIcon, LinkedInIcon, MailIcon, XIcon};
 
 pub struct Channel<'a> {
     pub label: &'a str,

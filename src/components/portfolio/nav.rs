@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::icons::{BlueSkyIcon, GitBranchIcon, XIcon};
+use ui::icons::{BlueSkyIcon, GitBranchIcon, XIcon};
 
 const LINKS: &[(&str, &str)] = &[
     ("/home", "/"),
@@ -11,18 +11,20 @@ const LINKS: &[(&str, &str)] = &[
 
 const MORE_LINKS: &[(&str, &str)] = &[
     ("/how-i-work", "/how-i-work"),
-    ("/music", "/music"),
+    ("/labs", "/labs"),
     ("/resume", "/resume"),
+    ("/music", "/music"),
 ];
 
 const ALL_LINKS: &[(&str, &str)] = &[
     ("/home", "/"),
     ("/about", "/about"),
+    ("/how-i-work", "/how-i-work"),
     ("/projects", "/projects"),
     ("/blog", "/blog"),
-    ("/how-i-work", "/how-i-work"),
-    ("/music", "/music"),
+    ("/labs", "/labs"),
     ("/resume", "/resume"),
+    ("/music", "/music"),
 ];
 
 #[component]
