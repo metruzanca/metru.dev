@@ -8,6 +8,7 @@ mod components;
 mod github;
 mod labs;
 mod lastfm;
+mod server_functions;
 mod utils;
 mod views;
 
@@ -55,6 +56,9 @@ fn NotFound(segments: Vec<String>) -> Element {
 }
 
 fn main() {
+    #[cfg(not(target_arch = "wasm32"))]
+    blog::start_background_refresh();
+
     dioxus::launch(App);
 }
 

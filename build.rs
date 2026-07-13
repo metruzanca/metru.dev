@@ -586,12 +586,7 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
     for record in &docs {
         let doc = &record.value;
 
-        let slug = doc
-            .path
-            .as_deref()
-            .filter(|p| !p.is_empty())
-            .map(|p| p.to_string())
-            .unwrap_or_else(|| slugify(&doc.title));
+        let slug = slugify(&doc.title);
 
         let body = blocks_to_markdown(&doc.content, &doc.text_content);
 

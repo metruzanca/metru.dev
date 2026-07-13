@@ -1,32 +1,29 @@
 use dioxus::prelude::*;
 
 use crate::blog;
+use crate::server_functions::get_blog_posts;
 use crate::Route;
 
 #[component]
 pub fn BlogPost(slug: String) -> Element {
-    let post = blog::post_by_slug(&slug);
     let nav = use_navigator();
+    let live = use_resource(|| async { get_blog_posts().await.unwrap_or_default() });
 
-    match post {
-        None => rsx! {
-            div { class: "flex items-center justify-center py-24",
-                div { class: "text-center",
-                    h1 { class: "font-heading text-2xl text-foreground", "Post not found" }
-                    p { class: "mt-2 text-muted-foreground", "The post you're looking for doesn't exist or hasn't been published yet." }
-                    a {
-                        class: "mt-6 inline-block text-neon-cyan hover:underline",
-                        href: "/blog",
-                        onclick: move |e| {
-                            e.prevent_default();
-                            nav.push(Route::BlogList {});
-                        },
-                        "Back to blog"
-                    }
-                }
-            }
-        },
-        Some(post) => {
+    let post = use_memo(move || {
+        let slug = slug.clone();
+        // Try live data first
+        if let Some(ref posts) = live() {
+            posts.iter().find(|p| p.slug == slug).cloned()
+        } else {
+            // Fall back to snapshot while live is loading
+            blog::post_by_slug(&slug).cloned()
+        }
+    });
+
+    let live_loaded = use_memo(move || live().is_some());
+
+    match (post(), live_loaded()) {
+        (Some(post), _) => {
             let frontmatter = &post.frontmatter;
             let html = blog::render_markdown(&post.body_markdown);
 
@@ -54,12 +51,39 @@ pub fn BlogPost(slug: String) -> Element {
                             }
                         }
 
-                        // Blog content rendered from markdown
                         div {
                             class: "prose-content",
                             dangerous_inner_html: html,
                         }
                     }
+            }
+        }
+        (None, true) => {
+            rsx! {
+                div { class: "flex items-center justify-center py-24",
+                    div { class: "text-center",
+                        h1 { class: "font-heading text-2xl text-foreground", "Post not found" }
+                        p { class: "mt-2 text-muted-foreground", "The post you're looking for doesn't exist or hasn't been published yet." }
+                        a {
+                            class: "mt-6 inline-block text-neon-cyan hover:underline",
+                            href: "/blog",
+                            onclick: move |e| {
+                                e.prevent_default();
+                                nav.push(Route::BlogList {});
+                            },
+                            "Back to blog"
+                        }
+                    }
+                }
+            }
+        }
+        (None, false) => {
+            rsx! {
+                div { class: "flex items-center justify-center py-24",
+                    div { class: "text-center",
+                        p { class: "text-muted-foreground", "Loading..." }
+                    }
+                }
             }
         }
     }
