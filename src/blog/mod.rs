@@ -328,6 +328,36 @@ mod live {
                         let text = apply_facets_to_markdown(plaintext, block.get("facets"));
                         markdown.push_str(&format!("{text}\n\n"));
                     }
+                    t if t.ends_with(".blocks.bullet") || t.ends_with(".blocks.list_item") => {
+                        let text = apply_facets_to_markdown(plaintext, block.get("facets"));
+                        let indent = block.get("indent").and_then(|i| i.as_u64()).unwrap_or(0);
+                        let prefix = "  ".repeat(indent as usize);
+                        markdown.push_str(&format!("{prefix}- {text}\n\n"));
+                    }
+                    t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
+                        let text = apply_facets_to_markdown(plaintext, block.get("facets"));
+                        for line in text.lines() {
+                            markdown.push_str(&format!("> {line}\n"));
+                        }
+                        markdown.push_str("\n");
+                    }
+                    t if t.ends_with(".blocks.horizontalRule") => {
+                        markdown.push_str("---\n\n");
+                    }
+                    t if t.ends_with(".blocks.unorderedList") || t.ends_with(".blocks.orderedList") => {
+                        let numbered = t.ends_with(".blocks.orderedList");
+                        if let Some(children) = block.get("children").and_then(|c| c.as_array()) {
+                            for (i, child) in children.iter().enumerate() {
+                                if let Some(content) = child.get("content") {
+                                    let item_text = content.get("plaintext").and_then(|t| t.as_str()).unwrap_or("");
+                                    let text = apply_facets_to_markdown(item_text, content.get("facets"));
+                                    let prefix = if numbered { format!("{}. ", i + 1) } else { "- ".to_string() };
+                                    markdown.push_str(&format!("{prefix}{text}\n"));
+                                }
+                            }
+                        }
+                        markdown.push_str("\n");
+                    }
                     _ => {
                         if !plaintext.is_empty() {
                             markdown.push_str(&format!("{plaintext}\n\n"));
