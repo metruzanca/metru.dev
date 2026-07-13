@@ -79,6 +79,9 @@ pub static POSTS: LazyLock<Vec<BlogPost>> = LazyLock::new(|| {
         .filter_map(|(name, content)| parse_blog_post(name, content))
         .collect();
     posts.sort_by(|a, b| b.frontmatter.timestamp.cmp(&a.frontmatter.timestamp));
+    // Deduplicate by slug: keep the first (newest) occurrence
+    let mut seen = std::collections::HashSet::new();
+    posts.retain(|p| seen.insert(p.slug.clone()));
     posts
 });
 
