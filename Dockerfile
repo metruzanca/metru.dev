@@ -24,8 +24,7 @@ RUN cargo binstall dioxus-cli --root /.cargo -y --force
 ENV PATH="/.cargo/bin:$PATH"
 
 # Create the final bundle folder with WASM splitting for lazy-loaded routes.
-RUN dx bundle --web --release --features "dioxus-router?/wasm-split" --experimental-wasm-split
-
+RUN dx bundle --web --release --wasm-split
 
 # 3. Move our app to the slim build
 
