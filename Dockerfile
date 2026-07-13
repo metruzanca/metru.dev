@@ -23,8 +23,8 @@ RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/ca
 RUN cargo binstall dioxus-cli --root /.cargo -y --force
 ENV PATH="/.cargo/bin:$PATH"
 
-# Create the final bundle folder. Bundle with release build profile to enable optimizations.
-RUN dx bundle --web --release
+# Create the final bundle folder with WASM splitting for lazy-loaded routes.
+RUN dx bundle --web --release --features "dioxus-router?/wasm-split" --experimental-wasm-split
 
 
 # 3. Move our app to the slim build

@@ -37,7 +37,14 @@ pub fn SiteLayout() -> Element {
         div { class: "relative min-h-screen bg-background",
             div { class: "pointer-events-none fixed inset-0 synth-grid opacity-40 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" }
             PortfolioNav {}
-            Outlet::<Route> {}
+            SuspenseBoundary {
+                fallback: |_| rsx! {
+                    div { class: "flex items-center justify-center py-24",
+                        div { class: "font-mono text-sm text-muted-foreground", "Loading..." }
+                    }
+                },
+                Outlet::<Route> {}
+            }
             CommandPalette { open: palette_open }
         }
     }
