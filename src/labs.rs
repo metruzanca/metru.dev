@@ -18,4 +18,8 @@ pub static LABS: &[LabInfo] = &[
         meta: &lab_word_count::META,
         render: lab_word_count::App,
     },
+    LabInfo {
+        meta: &lab_timezones::META,
+        render: lab_timezones::App,
+    },
 ];
