@@ -39,26 +39,18 @@ fn main() {
         ));
     }
 
-    // Generate consts for ATProto entries
-    for (i, entry) in atproto_entries.iter().enumerate() {
-        let const_name = format!("ATPROTO_{i}");
-        code.push_str(&format!(
-            "pub const {const_name}: &str = \"{}\";\n",
-            escape_rust_string(&entry.content)
-        ));
-    }
-
-    // Combine both sources into ALL_BLOG_FILES
-    code.push_str("\npub const ALL_BLOG_FILES: &[(&str, &str)] = &[\n");
+    code.push_str("\npub const MARKDOWN_FILES: &[(&str, &str)] = &[\n");
     for (i, file) in files.iter().enumerate() {
         let const_name = format!("FILE_{i}");
         code.push_str(&format!("    (\"{file}\", {const_name}),\n"));
     }
-    for (i, entry) in atproto_entries.iter().enumerate() {
-        let const_name = format!("ATPROTO_{i}");
-        code.push_str(&format!("    (\"{}\", {const_name}),\n", entry.filename));
-    }
     code.push_str("];\n");
+
+    // Generate JSON-encoded ATProto blog posts
+    let atproto_json = serde_json::to_string(&atproto_entries).unwrap_or_default();
+    code.push_str(&format!(
+        "\npub const ATPROTO_POSTS_JSON: &str = r#\"{atproto_json}\"#;\n"
+    ));
 
     fs::write(&dest, code).unwrap();
 
@@ -548,9 +540,24 @@ fn escape_rust_string(s: &str) -> String {
 
 // ── ATProto document fetching ─────────────────────────────────────────
 
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
+struct AtprotoFrontmatter {
+    title: String,
+    description: String,
+    #[serde(rename = "canonical_url")]
+    canonical_url: String,
+    timestamp: String,
+    publish: bool,
+    tags: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
 struct AtprotoEntry {
-    filename: String,
-    content: String,
+    slug: String,
+    frontmatter: AtprotoFrontmatter,
+    body: Vec<serde_json::Value>,
 }
 
 fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
@@ -587,35 +594,19 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
         let doc = &record.value;
 
         let slug = slugify(&doc.title);
-
-        let body = blocks_to_markdown(&doc.content, &doc.text_content);
-
-        let tags_yaml = match &doc.tags {
-            Some(tags) if !tags.is_empty() => {
-                let quoted: Vec<String> = tags
-                    .iter()
-                    .map(|t| format!("\"{}\"", yaml_escape(t)))
-                    .collect();
-                format!("[{}]", quoted.join(", "))
-            }
-            _ => String::new(),
-        };
-
-        let content = format!(
-            "---\ntitle: \"{}\"\ndescription: \"{}\"\ncanonical_url: {slug}\ntimestamp: {}\n{}\npublish: true\n---\n\n{body}",
-            yaml_escape(&doc.title),
-            yaml_escape(doc.description.as_deref().unwrap_or("")),
-            doc.published_at,
-            if tags_yaml.is_empty() {
-                String::new()
-            } else {
-                format!("tags: {tags_yaml}")
-            },
-        );
+        let body = blocks_to_body_json(&doc.content, &doc.text_content);
 
         entries.push(AtprotoEntry {
-            filename: slug,
-            content,
+            slug,
+            frontmatter: AtprotoFrontmatter {
+                title: doc.title.clone(),
+                description: doc.description.clone().unwrap_or_default(),
+                canonical_url: String::new(),
+                timestamp: doc.published_at.clone(),
+                publish: true,
+                tags: doc.tags.clone().unwrap_or_default(),
+            },
+            body,
         });
     }
 
@@ -631,119 +622,130 @@ fn slugify(s: &str) -> String {
         .join("-")
 }
 
-fn yaml_escape(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for c in s.chars() {
-        match c {
-            '\\' => out.push_str("\\\\"),
-            '"' => out.push_str("\\\""),
-            '\n' => out.push_str("\\n"),
-            '\r' => out.push_str("\\r"),
-            '\t' => out.push_str("\\t"),
-            other => out.push(other),
-        }
-    }
-    out
-}
-
-fn blocks_to_markdown(
+fn blocks_to_body_json(
     content: &Option<serde_json::Value>,
     text_content: &Option<String>,
-) -> String {
+) -> Vec<serde_json::Value> {
     let content = match content {
         Some(c) => c,
-        None => return text_content.clone().unwrap_or_default(),
+        None => return Vec::new(),
     };
 
     let pages = match content.get("pages").and_then(|p| p.as_array()) {
         Some(p) => p,
-        None => return text_content.clone().unwrap_or_default(),
+        None => return Vec::new(),
     };
 
-    let mut markdown = String::new();
+    let mut blocks = Vec::new();
     for page in pages {
-        let blocks = match page.get("blocks").and_then(|b| b.as_array()) {
+        let page_blocks = match page.get("blocks").and_then(|b| b.as_array()) {
             Some(b) => b,
             None => continue,
         };
 
-        for block_value in blocks {
+        for block_value in page_blocks {
             let block = match block_value.get("block") {
                 Some(b) => b,
                 None => continue,
             };
 
-            let block_type = block
-                .get("$type")
-                .and_then(|t| t.as_str())
-                .unwrap_or("");
-            let plaintext = block
-                .get("plaintext")
-                .and_then(|t| t.as_str())
-                .unwrap_or("");
-
-            match block_type {
-                t if t.ends_with(".blocks.header") => {
-                    let level = block.get("level").and_then(|l| l.as_u64()).unwrap_or(1);
-                    let prefix = "#".repeat(level as usize);
-                    let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                    markdown.push_str(&format!("{prefix} {text}\n\n"));
-                }
-                t if t.ends_with(".blocks.text") => {
-                    let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                    markdown.push_str(&format!("{text}\n\n"));
-                }
-                t if t.ends_with(".blocks.bullet") || t.ends_with(".blocks.list_item") => {
-                    let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                    let indent = block.get("indent").and_then(|i| i.as_u64()).unwrap_or(0);
-                    let prefix = "  ".repeat(indent as usize);
-                    markdown.push_str(&format!("{prefix}- {text}\n\n"));
-                }
-                t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
-                    let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                    for line in text.lines() {
-                        markdown.push_str(&format!("> {line}\n"));
-                    }
-                    markdown.push_str("\n");
-                }
-                t if t.ends_with(".blocks.horizontalRule") => {
-                    markdown.push_str("---\n\n");
-                }
-                t if t.ends_with(".blocks.unorderedList") || t.ends_with(".blocks.orderedList") => {
-                    let numbered = t.ends_with(".blocks.orderedList");
-                    if let Some(children) = block.get("children").and_then(|c| c.as_array()) {
-                        for (i, child) in children.iter().enumerate() {
-                            if let Some(content) = child.get("content") {
-                                let item_text = content.get("plaintext").and_then(|t| t.as_str()).unwrap_or("");
-                                let text = apply_facets_to_markdown(item_text, content.get("facets"));
-                                let prefix = if numbered { format!("{}. ", i + 1) } else { "- ".to_string() };
-                                markdown.push_str(&format!("{prefix}{text}\n"));
-                            }
-                        }
-                    }
-                    markdown.push_str("\n");
-                }
-                _ => {
-                    markdown.push_str(&format!("{plaintext}\n\n"));
-                }
+            if let Some(converted) = atproto_block_to_json(block) {
+                blocks.push(converted);
             }
         }
     }
 
-    if markdown.is_empty() {
-        return text_content.clone().unwrap_or_default();
+    if blocks.is_empty() {
+        if let Some(text) = text_content {
+            blocks.push(serde_json::json!({"Paragraph": [{"Text": text}]}));
+        }
     }
 
-    markdown
+    blocks
 }
 
-fn apply_facets_to_markdown(
+fn atproto_block_to_json(block: &serde_json::Value) -> Option<serde_json::Value> {
+    let block_type = block
+        .get("$type")
+        .and_then(|t| t.as_str())
+        .unwrap_or("");
+    let plaintext = block
+        .get("plaintext")
+        .and_then(|t| t.as_str())
+        .unwrap_or("");
+
+    match block_type {
+        t if t.ends_with(".blocks.header") => {
+            let level = block.get("level").and_then(|l| l.as_u64()).unwrap_or(1) as u8;
+            let children = apply_facets_to_inlines_json(plaintext, block.get("facets"));
+            Some(serde_json::json!({"Heading": {"level": level, "children": children}}))
+        }
+        t if t.ends_with(".blocks.text") => {
+            let children = apply_facets_to_inlines_json(plaintext, block.get("facets"));
+            Some(serde_json::json!({"Paragraph": children}))
+        }
+        t if t.ends_with(".blocks.bullet") || t.ends_with(".blocks.list_item") => {
+            let children = apply_facets_to_inlines_json(plaintext, block.get("facets"));
+            Some(serde_json::json!({"UnorderedList": [children]}))
+        }
+        t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
+            let children = apply_facets_to_inlines_json(plaintext, block.get("facets"));
+            Some(serde_json::json!({"Blockquote": children}))
+        }
+        t if t.ends_with(".blocks.horizontalRule") => {
+            Some(serde_json::json!("ThematicBreak"))
+        }
+        t if t.ends_with(".blocks.unorderedList") || t.ends_with(".blocks.orderedList") => {
+            let numbered = t.ends_with(".blocks.orderedList");
+            let items: Vec<serde_json::Value> = block
+                .get("children")
+                .and_then(|c| c.as_array())
+                .map(|children| {
+                    children
+                        .iter()
+                        .filter_map(|child| {
+                            let content = child.get("content")?;
+                            let item_text = content
+                                .get("plaintext")
+                                .and_then(|t| t.as_str())
+                                .unwrap_or("");
+                            let inlines =
+                                apply_facets_to_inlines_json(item_text, content.get("facets"));
+                            if inlines.is_empty() {
+                                None
+                            } else {
+                                Some(serde_json::Value::Array(inlines))
+                            }
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+
+            if items.is_empty() {
+                None
+            } else if numbered {
+                Some(serde_json::json!({"OrderedList": items}))
+            } else {
+                Some(serde_json::json!({"UnorderedList": items}))
+            }
+        }
+        _ => {
+            if !plaintext.is_empty() {
+                Some(serde_json::json!({"Paragraph": [{"Text": plaintext}]}))
+            } else {
+                None
+            }
+        }
+    }
+}
+
+fn apply_facets_to_inlines_json(
     text: &str,
     facets: Option<&serde_json::Value>,
-) -> String {
+) -> Vec<serde_json::Value> {
     let facets = match facets.and_then(|f| f.as_array()) {
         Some(f) if !f.is_empty() => f,
-        _ => return text.to_string(),
+        _ => return vec![serde_json::json!({"Text": text})],
     };
 
     let mut sorted: Vec<&serde_json::Value> = facets.iter().collect();
@@ -754,10 +756,10 @@ fn apply_facets_to_markdown(
             .unwrap_or(0)
     });
 
-    let mut output = String::new();
+    let mut result = Vec::new();
     let mut last_end: usize = 0;
-    let text_bytes = text.as_bytes();
     let text_len = text.len();
+    let text_bytes = text.as_bytes();
 
     for facet in &sorted {
         let index = match facet.get("index") {
@@ -786,22 +788,30 @@ fn apply_facets_to_markdown(
             });
 
         if start > last_end {
-            output.push_str(&text[last_end..start]);
+            let seg = std::str::from_utf8(&text_bytes[last_end..start]).unwrap_or("");
+            if !seg.is_empty() {
+                result.push(serde_json::json!({"Text": seg}));
+            }
         }
 
         let segment = std::str::from_utf8(&text_bytes[start..end]).unwrap_or("");
-        if let Some(uri) = uri {
-            output.push_str(&format!("[{segment}]({uri})"));
-        } else {
-            output.push_str(segment);
+        if !segment.is_empty() {
+            if let Some(url) = uri {
+                result.push(serde_json::json!({"Link": {"url": url, "children": [{"Text": segment}]}}));
+            } else {
+                result.push(serde_json::json!({"Text": segment}));
+            }
         }
 
         last_end = end;
     }
 
     if last_end < text_len {
-        output.push_str(&text[last_end..]);
+        let seg = std::str::from_utf8(&text_bytes[last_end..]).unwrap_or("");
+        if !seg.is_empty() {
+            result.push(serde_json::json!({"Text": seg}));
+        }
     }
 
-    output
+    result
 }

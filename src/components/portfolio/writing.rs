@@ -30,7 +30,7 @@ pub fn PortfolioWriting() -> Element {
 pub fn WritingItem(post: blog::BlogPost, expanded: Option<bool>) -> Element {
     let slug = post.slug.clone();
     let date = format_post_date(&post.frontmatter.timestamp);
-    let read_time = estimate_read_time(&post.body_markdown);
+    let read_time = estimate_read_time(&post.body);
     let is_expanded = expanded.unwrap_or(false);
 
     rsx! {
@@ -89,7 +89,7 @@ fn format_post_date(iso: &str) -> String {
     format!("{month} {day_num:02}, {year}")
 }
 
-fn estimate_read_time(body: &str) -> usize {
-    let words = body.split_whitespace().count();
-    (words / 200).max(1)
+fn estimate_read_time(blocks: &[blog::Block]) -> usize {
+    let words = blog::content::blocks_to_plain_text(blocks);
+    (words.split_whitespace().count() / 200).max(1)
 }

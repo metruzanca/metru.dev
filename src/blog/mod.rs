@@ -1,5 +1,10 @@
+pub mod content;
+
 use std::collections::BTreeMap;
 use std::sync::LazyLock;
+
+#[allow(unused_imports)]
+pub use content::{render_blocks, Block, Inline};
 
 // Include auto-generated blog post content from build.rs
 include!(concat!(env!("OUT_DIR"), "/blog_posts.rs"));
@@ -28,8 +33,9 @@ fn default_true() -> bool {
 pub struct BlogPost {
     pub slug: String,
     pub frontmatter: BlogFrontmatter,
-    /// Raw markdown body (after frontmatter)
-    pub body_markdown: String,
+    /// Structured content blocks — the canonical body representation.
+    /// Rendered to HTML via `content::render_blocks`.
+    pub body: Vec<Block>,
 }
 
 fn extract_slug(canonical_url: &str) -> String {
@@ -51,35 +57,55 @@ fn slugify(s: &str) -> String {
 }
 
 fn split_frontmatter(raw: &str) -> Option<(&str, &str)> {
-    let content = raw.strip_prefix("---\n").or_else(|| raw.strip_prefix("---\r\n"))?;
+    let content = raw
+        .strip_prefix("---\n")
+        .or_else(|| raw.strip_prefix("---\r\n"))?;
     let end = content.find("\n---")?;
     let (frontmatter, rest) = content.split_at(end);
-    let body = rest.strip_prefix("\n---")?.strip_prefix('\n').unwrap_or(rest);
+    let body = rest
+        .strip_prefix("\n---")?
+        .strip_prefix('\n')
+        .unwrap_or(rest);
     Some((frontmatter, body))
 }
 
 fn parse_blog_post(filename: &str, raw: &str) -> Option<BlogPost> {
-    let (fm_str, body) = split_frontmatter(raw)?;
+    let (fm_str, body_md) = split_frontmatter(raw)?;
     let frontmatter: BlogFrontmatter = serde_yaml::from_str(fm_str).ok()?;
     let slug = if frontmatter.canonical_url.is_empty() {
         slugify(filename)
     } else {
         extract_slug(&frontmatter.canonical_url)
     };
+
+    let body = match markdown::to_mdast(body_md, &markdown::ParseOptions::gfm()) {
+        Ok(root) => content::from_mdast(&root),
+        Err(_) => Vec::new(),
+    };
+
     Some(BlogPost {
         slug,
         frontmatter,
-        body_markdown: body.to_string(),
+        body,
     })
 }
 
 pub static POSTS: LazyLock<Vec<BlogPost>> = LazyLock::new(|| {
-    let mut posts: Vec<BlogPost> = ALL_BLOG_FILES
-        .iter()
-        .filter_map(|(name, content)| parse_blog_post(name, content))
-        .collect();
+    let mut posts: Vec<BlogPost> = Vec::new();
+
+    // Parse markdown source files
+    for (name, content) in MARKDOWN_FILES {
+        if let Some(post) = parse_blog_post(name, content) {
+            posts.push(post);
+        }
+    }
+
+    // Deserialize pre-built ATProto posts
+    if let Ok(atproto_posts) = serde_json::from_str::<Vec<BlogPost>>(ATPROTO_POSTS_JSON) {
+        posts.extend(atproto_posts);
+    }
+
     posts.sort_by(|a, b| b.frontmatter.timestamp.cmp(&a.frontmatter.timestamp));
-    // Deduplicate by slug: keep the first (newest) occurrence
     let mut seen = std::collections::HashSet::new();
     posts.retain(|p| seen.insert(p.slug.clone()));
     posts
@@ -90,7 +116,9 @@ pub fn published_posts() -> Vec<&'static BlogPost> {
 }
 
 pub fn post_by_slug(slug: &str) -> Option<&'static BlogPost> {
-    POSTS.iter().find(|p| p.slug == slug && p.frontmatter.publish)
+    POSTS
+        .iter()
+        .find(|p| p.slug == slug && p.frontmatter.publish)
 }
 
 pub fn published_posts_owned() -> Vec<BlogPost> {
@@ -107,85 +135,14 @@ pub fn all_tags() -> Vec<(String, usize)> {
     counts.into_iter().collect()
 }
 
-pub fn render_markdown(markdown: &str) -> String {
-    let html = markdown::to_html_with_options(markdown, &markdown::Options::gfm())
-        .unwrap_or_else(|_| markdown.to_string());
-    let html = rewrite_image_urls(&html);
-    let html = rewrite_list_items(&html);
-    highlight_code_blocks(&html)
-}
-
-fn rewrite_image_urls(html: &str) -> String {
-    let re = regex::Regex::new(r#"src="\./_assets/([^"]+)""#).unwrap();
-    re.replace_all(html, r#"src="/assets/blog/$1""#).into_owned()
-}
-
-fn rewrite_list_items(html: &str) -> String {
-    let re = regex::Regex::new(r"<li>\s*<p>(.*?)</p>\s*</li>").unwrap();
-    re.replace_all(html, "<li>$1</li>").into_owned()
-}
-
-// -- Syntax highlighting ---------------------------------------------------
-
-use syntect::html::highlighted_html_for_string;
-use syntect::parsing::SyntaxSet;
-use syntect::highlighting::ThemeSet;
-
-static SYNTAXES: LazyLock<SyntaxSet> = LazyLock::new(two_face::syntax::extra_newlines);
-static THEME: LazyLock<syntect::highlighting::Theme> = LazyLock::new(|| {
-    let ts = ThemeSet::load_defaults();
-    ts.themes["base16-ocean.dark"].clone()
-});
-
-fn decode_html_entities(s: &str) -> String {
-    s.replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&amp;", "&")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
-        .replace("&#x27;", "'")
-}
-
-fn highlight_code_blocks(html: &str) -> String {
-    let re = regex::Regex::new(
-        r#"<pre><code class="language-([^"]*)">((?s).*?)</code></pre>"#,
-    )
-    .unwrap();
-
-    re.replace_all(html, |caps: &regex::Captures| {
-        let lang = caps.get(1).map(|m| m.as_str()).unwrap_or("");
-        let code = caps.get(2).map(|m| m.as_str()).unwrap_or("");
-        let code = decode_html_entities(code);
-        highlight_code(lang, &code)
-            .unwrap_or_else(|_| format!("<pre><code>{code}</code></pre>"))
-    })
-    .into_owned()
-}
-
-fn highlight_code(lang: &str, code: &str) -> Result<String, syntect::Error> {
-    let syntax = SYNTAXES
-        .find_syntax_by_token(lang)
-        .unwrap_or_else(|| SYNTAXES.find_syntax_plain_text());
-
-    let highlighted = highlighted_html_for_string(code, &SYNTAXES, syntax, &THEME)?;
-
-    let lang_label = if lang.is_empty() {
-        String::new()
-    } else {
-        format!("<div class=\"code-lang\">{lang}</div>")
-    };
-
-    Ok(format!(
-        "<div class=\"code-block-wrapper\">{lang_label}{highlighted}</div>"
-    ))
-}
-
 // ── Server-only: live ATProto cache with hourly background refresh ────
 
 #[cfg(not(target_arch = "wasm32"))]
 mod live {
     use std::sync::{OnceLock, RwLock};
     use std::time::Duration;
+
+    use crate::blog::content::{Block, Inline};
 
     use super::*;
 
@@ -226,10 +183,10 @@ mod live {
     }
 
     fn document_to_post(doc: atcrab::lexicons::Document) -> Option<BlogPost> {
-        let slug = slugify(&doc.title);
-        let body = blocks_to_markdown(&doc.content, &doc.text_content);
+        let body = blocks_to_body(&doc.content, &doc.text_content);
+
         Some(BlogPost {
-            slug,
+            slug: slugify(&doc.title),
             frontmatter: BlogFrontmatter {
                 title: doc.title,
                 description: doc.description.unwrap_or_default(),
@@ -238,7 +195,7 @@ mod live {
                 publish: true,
                 tags: doc.tags.unwrap_or_default(),
             },
-            body_markdown: body,
+            body,
         })
     }
 
@@ -263,7 +220,6 @@ mod live {
     }
 
     pub fn start_background_refresh() {
-        // Pre-warm the cache on the calling thread before spawning
         init_cache();
 
         std::thread::spawn(|| {
@@ -275,7 +231,6 @@ mod live {
                 }
             };
 
-            // Brief delay so the server can finish starting up
             std::thread::sleep(Duration::from_secs(10));
 
             loop {
@@ -290,105 +245,136 @@ mod live {
         });
     }
 
-    // ── ATProto content block → markdown conversion ───────────────────
+    // ── ATProto content block → Block conversion ───────────────────
 
-    fn blocks_to_markdown(
+    fn blocks_to_body(
         content: &Option<serde_json::Value>,
         text_content: &Option<String>,
-    ) -> String {
+    ) -> Vec<Block> {
         let content = match content {
             Some(c) => c,
-            None => return text_content.clone().unwrap_or_default(),
+            None => return Vec::new(),
         };
 
         let pages = match content.get("pages").and_then(|p| p.as_array()) {
             Some(p) => p,
-            None => return text_content.clone().unwrap_or_default(),
+            None => return Vec::new(),
         };
 
-        let mut markdown = String::new();
+        let mut blocks = Vec::new();
         for page in pages {
-            let blocks = match page.get("blocks").and_then(|b| b.as_array()) {
+            let page_blocks = match page.get("blocks").and_then(|b| b.as_array()) {
                 Some(b) => b,
                 None => continue,
             };
 
-            for block_value in blocks {
+            for block_value in page_blocks {
                 let block = match block_value.get("block") {
                     Some(b) => b,
                     None => continue,
                 };
 
-                let block_type = block
-                    .get("$type")
-                    .and_then(|t| t.as_str())
-                    .unwrap_or("");
-                let plaintext = block
-                    .get("plaintext")
-                    .and_then(|t| t.as_str())
-                    .unwrap_or("");
-
-                match block_type {
-                    t if t.ends_with(".blocks.header") => {
-                        let level = block.get("level").and_then(|l| l.as_u64()).unwrap_or(1);
-                        let prefix = "#".repeat(level as usize);
-                        let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                        markdown.push_str(&format!("{prefix} {text}\n\n"));
-                    }
-                    t if t.ends_with(".blocks.text") => {
-                        let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                        markdown.push_str(&format!("{text}\n\n"));
-                    }
-                    t if t.ends_with(".blocks.bullet") || t.ends_with(".blocks.list_item") => {
-                        let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                        let indent = block.get("indent").and_then(|i| i.as_u64()).unwrap_or(0);
-                        let prefix = "  ".repeat(indent as usize);
-                        markdown.push_str(&format!("{prefix}- {text}\n\n"));
-                    }
-                    t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
-                        let text = apply_facets_to_markdown(plaintext, block.get("facets"));
-                        for line in text.lines() {
-                            markdown.push_str(&format!("> {line}\n"));
-                        }
-                        markdown.push_str("\n");
-                    }
-                    t if t.ends_with(".blocks.horizontalRule") => {
-                        markdown.push_str("---\n\n");
-                    }
-                    t if t.ends_with(".blocks.unorderedList") || t.ends_with(".blocks.orderedList") => {
-                        let numbered = t.ends_with(".blocks.orderedList");
-                        if let Some(children) = block.get("children").and_then(|c| c.as_array()) {
-                            for (i, child) in children.iter().enumerate() {
-                                if let Some(content) = child.get("content") {
-                                    let item_text = content.get("plaintext").and_then(|t| t.as_str()).unwrap_or("");
-                                    let text = apply_facets_to_markdown(item_text, content.get("facets"));
-                                    let prefix = if numbered { format!("{}. ", i + 1) } else { "- ".to_string() };
-                                    markdown.push_str(&format!("{prefix}{text}\n"));
-                                }
-                            }
-                        }
-                        markdown.push_str("\n");
-                    }
-                    _ => {
-                        if !plaintext.is_empty() {
-                            markdown.push_str(&format!("{plaintext}\n\n"));
-                        }
-                    }
+                if let Some(converted) = atproto_block(block) {
+                    blocks.push(converted);
                 }
             }
         }
 
-        if markdown.is_empty() {
-            return text_content.clone().unwrap_or_default();
+        if blocks.is_empty() {
+            if let Some(text) = text_content {
+                blocks.push(Block::Paragraph(vec![Inline::Text(text.clone())]));
+            }
         }
 
-        markdown
+        blocks
     }
 
-    fn apply_facets_to_markdown(text: &str, facets: Option<&serde_json::Value>) -> String {
+    fn atproto_block(block: &serde_json::Value) -> Option<Block> {
+        let block_type = block
+            .get("$type")
+            .and_then(|t| t.as_str())
+            .unwrap_or("");
+        let plaintext = block
+            .get("plaintext")
+            .and_then(|t| t.as_str())
+            .unwrap_or("");
+
+        match block_type {
+            t if t.ends_with(".blocks.header") => {
+                let level = block.get("level").and_then(|l| l.as_u64()).unwrap_or(1) as u8;
+                let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
+                Some(Block::Heading {
+                    level,
+                    children: inlines,
+                })
+            }
+            t if t.ends_with(".blocks.text") => {
+                let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
+                Some(Block::Paragraph(inlines))
+            }
+            t if t.ends_with(".blocks.bullet") || t.ends_with(".blocks.list_item") => {
+                let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
+                // Each bullet/item becomes a single-item list for simplicity
+                Some(Block::UnorderedList(vec![inlines]))
+            }
+            t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
+                let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
+                Some(Block::Blockquote(inlines))
+            }
+            t if t.ends_with(".blocks.horizontalRule") => Some(Block::ThematicBreak),
+            t if t.ends_with(".blocks.unorderedList")
+                || t.ends_with(".blocks.orderedList") =>
+            {
+                let numbered = t.ends_with(".blocks.orderedList");
+                let items: Vec<Vec<Inline>> = block
+                    .get("children")
+                    .and_then(|c| c.as_array())
+                    .map(|children| {
+                        children
+                            .iter()
+                            .filter_map(|child| {
+                                let content = child.get("content")?;
+                                let item_text = content
+                                    .get("plaintext")
+                                    .and_then(|t| t.as_str())
+                                    .unwrap_or("");
+                                let inlines =
+                                    apply_facets_to_inlines(item_text, content.get("facets"));
+                                if inlines.is_empty() {
+                                    None
+                                } else {
+                                    Some(inlines)
+                                }
+                            })
+                            .collect()
+                    })
+                    .unwrap_or_default();
+
+                if items.is_empty() {
+                    None
+                } else if numbered {
+                    Some(Block::OrderedList(items))
+                } else {
+                    Some(Block::UnorderedList(items))
+                }
+            }
+            _ => {
+                if !plaintext.is_empty() {
+                    Some(Block::Paragraph(vec![Inline::Text(plaintext.to_string())]))
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
+    fn apply_facets_to_inlines(
+        text: &str,
+        facets: Option<&serde_json::Value>,
+    ) -> Vec<Inline> {
         let facets = match facets.and_then(|f| f.as_array()) {
             Some(f) if !f.is_empty() => f,
-            _ => return text.to_string(),
+            _ => return vec![Inline::Text(text.to_string())],
         };
 
         let mut sorted: Vec<&serde_json::Value> = facets.iter().collect();
@@ -399,10 +385,10 @@ mod live {
                 .unwrap_or(0)
         });
 
-        let mut output = String::new();
+        let mut result = Vec::new();
         let mut last_end: usize = 0;
-        let text_bytes = text.as_bytes();
         let text_len = text.len();
+        let text_bytes = text.as_bytes();
 
         for facet in &sorted {
             let index = match facet.get("index") {
@@ -431,24 +417,38 @@ mod live {
                 });
 
             if start > last_end {
-                output.push_str(&text[last_end..start]);
+                let seg =
+                    std::str::from_utf8(&text_bytes[last_end..start]).unwrap_or("");
+                if !seg.is_empty() {
+                    result.push(Inline::Text(seg.to_string()));
+                }
             }
 
-            let segment = std::str::from_utf8(&text_bytes[start..end]).unwrap_or("");
-            if let Some(uri) = uri {
-                output.push_str(&format!("[{segment}]({uri})"));
-            } else {
-                output.push_str(segment);
+            let segment =
+                std::str::from_utf8(&text_bytes[start..end]).unwrap_or("");
+            if !segment.is_empty() {
+                if let Some(url) = uri {
+                    result.push(Inline::Link {
+                        url: url.to_string(),
+                        children: vec![Inline::Text(segment.to_string())],
+                    });
+                } else {
+                    result.push(Inline::Text(segment.to_string()));
+                }
             }
 
             last_end = end;
         }
 
         if last_end < text_len {
-            output.push_str(&text[last_end..]);
+            let seg =
+                std::str::from_utf8(&text_bytes[last_end..]).unwrap_or("");
+            if !seg.is_empty() {
+                result.push(Inline::Text(seg.to_string()));
+            }
         }
 
-        output
+        result
     }
 }
 
