@@ -1,6 +1,6 @@
 ---
 timestamp: 2024-04-05T19:25:49
-publish: true
+publish: false
 tags:
   - programming
   - best-practice
