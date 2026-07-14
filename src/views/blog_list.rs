@@ -6,11 +6,12 @@ use crate::server_functions::get_blog_posts;
 
 #[component]
 pub fn BlogList() -> Element {
-    let live = use_resource(|| async { get_blog_posts().await.unwrap_or_default() });
+    let merged = use_server_future(|| async {
+        get_blog_posts().await.unwrap_or_default()
+    })?;
 
-    let posts = use_memo(move || match live() {
-        Some(p) => p,
-        None => blog::published_posts_owned(),
+    let posts = use_memo(move || {
+        merged().unwrap_or_else(|| blog::published_posts_owned())
     });
 
     rsx! {

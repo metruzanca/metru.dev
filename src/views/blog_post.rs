@@ -7,23 +7,18 @@ use crate::Route;
 #[component]
 pub fn BlogPost(slug: String) -> Element {
     let nav = use_navigator();
-    let live = use_resource(|| async { get_blog_posts().await.unwrap_or_default() });
+    let merged = use_server_future(|| async {
+        get_blog_posts().await.unwrap_or_default()
+    })?;
 
     let post = use_memo(move || {
-        let slug = slug.clone();
-        // Try live data first
-        if let Some(ref posts) = live() {
-            posts.iter().find(|p| p.slug == slug).cloned()
-        } else {
-            // Fall back to snapshot while live is loading
-            blog::post_by_slug(&slug).cloned()
-        }
+        merged()
+            .or_else(|| Some(blog::published_posts_owned()))
+            .and_then(|posts| posts.into_iter().find(|p| p.slug == slug.clone()))
     });
 
-    let live_loaded = use_memo(move || live().is_some());
-
-    match (post(), live_loaded()) {
-        (Some(post), _) => {
+    match post() {
+        Some(post) => {
             let frontmatter = &post.frontmatter;
             let html = blog::render_markdown(&post.body_markdown);
 
@@ -58,7 +53,7 @@ pub fn BlogPost(slug: String) -> Element {
                     }
             }
         }
-        (None, true) => {
+        None => {
             rsx! {
                 div { class: "flex items-center justify-center py-24",
                     div { class: "text-center",
@@ -73,15 +68,6 @@ pub fn BlogPost(slug: String) -> Element {
                             },
                             "Back to blog"
                         }
-                    }
-                }
-            }
-        }
-        (None, false) => {
-            rsx! {
-                div { class: "flex items-center justify-center py-24",
-                    div { class: "text-center",
-                        p { class: "text-muted-foreground", "Loading..." }
                     }
                 }
             }
