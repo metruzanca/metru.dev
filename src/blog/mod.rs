@@ -245,7 +245,12 @@ mod live {
     pub fn get_merged_posts() -> Vec<BlogPost> {
         let cache = init_cache();
         let guard = cache.read().unwrap();
-        let mut all = guard.snapshot.clone();
+        let mut all: Vec<BlogPost> = guard
+            .snapshot
+            .iter()
+            .filter(|p| p.frontmatter.publish)
+            .cloned()
+            .collect();
         for live in &guard.live {
             if let Some(pos) = all.iter().position(|p| p.slug == live.slug) {
                 all[pos] = live.clone();
