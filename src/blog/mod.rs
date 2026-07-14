@@ -111,12 +111,18 @@ pub fn render_markdown(markdown: &str) -> String {
     let html = markdown::to_html_with_options(markdown, &markdown::Options::gfm())
         .unwrap_or_else(|_| markdown.to_string());
     let html = rewrite_image_urls(&html);
+    let html = rewrite_list_items(&html);
     highlight_code_blocks(&html)
 }
 
 fn rewrite_image_urls(html: &str) -> String {
     let re = regex::Regex::new(r#"src="\./_assets/([^"]+)""#).unwrap();
     re.replace_all(html, r#"src="/assets/blog/$1""#).into_owned()
+}
+
+fn rewrite_list_items(html: &str) -> String {
+    let re = regex::Regex::new(r"<li>\s*<p>(.*?)</p>\s*</li>").unwrap();
+    re.replace_all(html, "<li>$1</li>").into_owned()
 }
 
 // -- Syntax highlighting ---------------------------------------------------
