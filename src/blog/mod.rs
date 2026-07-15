@@ -342,7 +342,7 @@ mod live {
             }
             t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
                 let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
-                Some(Block::Blockquote(inlines))
+                Some(Block::Blockquote(vec![Block::Paragraph(inlines)]))
             }
             t if t.ends_with(".blocks.horizontalRule") => Some(Block::ThematicBreak),
             t if t.ends_with(".blocks.unorderedList")

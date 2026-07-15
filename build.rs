@@ -705,7 +705,7 @@ fn atproto_block_to_json(block: &serde_json::Value) -> Option<serde_json::Value>
         }
         t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {
             let children = apply_facets_to_inlines_json(plaintext, block.get("facets"));
-            Some(serde_json::json!({"Blockquote": children}))
+            Some(serde_json::json!({"Blockquote": [{"Paragraph": children}]}))
         }
         t if t.ends_with(".blocks.horizontalRule") => {
             Some(serde_json::json!("ThematicBreak"))

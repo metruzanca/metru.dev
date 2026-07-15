@@ -15,7 +15,7 @@ pub enum Block {
     },
     UnorderedList(Vec<Vec<Inline>>),
     OrderedList(Vec<Vec<Inline>>),
-    Blockquote(Vec<Inline>),
+    Blockquote(Vec<Block>),
     ThematicBreak,
     Raw(String),
 }
@@ -48,6 +48,10 @@ pub fn from_mdast(root: &markdown::mdast::Node) -> Vec<Block> {
     }
 }
 
+fn blocks_from_mdast_nodes(nodes: &[markdown::mdast::Node]) -> Vec<Block> {
+    nodes.iter().filter_map(block_from_mdast).collect()
+}
+
 fn block_from_mdast(node: &markdown::mdast::Node) -> Option<Block> {
     match node {
         markdown::mdast::Node::Heading(h) => Some(Block::Heading {
@@ -63,7 +67,7 @@ fn block_from_mdast(node: &markdown::mdast::Node) -> Option<Block> {
         }),
         markdown::mdast::Node::ThematicBreak(_) => Some(Block::ThematicBreak),
         markdown::mdast::Node::Blockquote(bq) => {
-            let children = inlines_from_nodes(&bq.children);
+            let children = blocks_from_mdast_nodes(&bq.children);
             if children.is_empty() {
                 None
             } else {
@@ -176,8 +180,8 @@ pub fn render_blocks(blocks: &[Block]) -> String {
                 html.push_str("</ol>\n");
             }
             Block::Blockquote(children) => {
-                let inner = render_inlines(children);
-                html.push_str(&format!("<blockquote><p>{inner}</p></blockquote>\n"));
+                let inner = render_blocks(children);
+                html.push_str(&format!("<blockquote>\n{inner}</blockquote>\n"));
             }
             Block::ThematicBreak => {
                 html.push_str("<hr>\n");
@@ -291,9 +295,12 @@ pub fn blocks_to_plain_text(blocks: &[Block]) -> String {
     for block in blocks {
         match block {
             Block::Heading { children, .. }
-            | Block::Paragraph(children)
-            | Block::Blockquote(children) => {
+            | Block::Paragraph(children) => {
                 text.push_str(&inlines_to_plain_text(children));
+                text.push(' ');
+            }
+            Block::Blockquote(children) => {
+                text.push_str(&blocks_to_plain_text(children));
                 text.push(' ');
             }
             Block::CodeBlock { code, .. } => {
