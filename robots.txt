@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /design-system
-Sitemap: https://metru.dev/sitemap.xml

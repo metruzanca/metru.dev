@@ -22,7 +22,7 @@ fn main() {
 
     files.sort();
 
-    // Fetch ATProto documents from metru.dev
+    // Fetch ATProto documents
     let atproto_entries = fetch_atproto_entries();
 
     let out_dir = env::var("OUT_DIR").unwrap();
@@ -56,9 +56,15 @@ fn main() {
 
     println!("cargo:rerun-if-changed=blog/");
 
-    // Copy robots.txt to the public directory
-    let robots_src = format!("{manifest_dir}/robots.txt");
-    let _ = fs::copy(&robots_src, format!("{manifest_dir}/public/robots.txt"));
+    // Generate robots.txt
+    let domain = env::var("SITE_DOMAIN").unwrap_or_else(|_| "metru.dev".to_string());
+    let robots = format!(
+        "User-agent: *\n\
+         Allow: /\n\
+         Disallow: /design-system\n\
+         Sitemap: https://{domain}/sitemap.xml\n"
+    );
+    fs::write(format!("{manifest_dir}/public/robots.txt"), &robots).unwrap();
     println!("cargo:rerun-if-changed=robots.txt");
 
     // Copy blog _assets into the public directory so Dioxus serves them
@@ -569,8 +575,9 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
         }
     };
 
+    let atproto_handle = env::var("ATPROTO_HANDLE").unwrap_or_else(|_| "metru.dev".to_string());
     let (docs, did, pds) = match rt.block_on(async {
-        let repo = atcrab::Repo::new("metru.dev").await.map_err(|e| format!("ATProto repo resolve: {e}"))?;
+        let repo = atcrab::Repo::new(&atproto_handle).await.map_err(|e| format!("ATProto repo resolve: {e}"))?;
         let did = repo.did.clone();
         let pds = repo.pds.clone();
         let records = repo
@@ -587,7 +594,7 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
     };
 
     eprintln!(
-        "cargo:warning=Fetched {} ATProto documents from metru.dev",
+        "cargo:warning=Fetched {} ATProto documents from {atproto_handle}",
         docs.len()
     );
 

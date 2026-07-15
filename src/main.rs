@@ -5,6 +5,7 @@ use views::{About, BlogList, BlogPost, DesignSystem, HowIWork, LabPage, LabsList
 
 mod blog;
 mod components;
+mod env;
 mod github;
 mod labs;
 mod lastfm;
@@ -94,14 +95,14 @@ fn App() -> Element {
         document::Meta { property: "og:title", content: "Sam Zanca — Full-Stack Engineer" }
         document::Meta { property: "og:description", content: "Building fast, reliable products with Rust and modern web technologies." }
         document::Meta { property: "og:type", content: "website" }
-        document::Meta { property: "og:url", content: "https://metru.dev" }
-        document::Meta { property: "og:image", content: "https://metru.dev/assets/synthwave-horizon.png" }
+        document::Meta { property: "og:url", content: format!("https://{}/", env::site_domain()) }
+        document::Meta { property: "og:image", content: format!("https://{}/assets/synthwave-horizon.png", env::site_domain()) }
 
         // Twitter Card
         document::Meta { name: "twitter:card", content: "summary_large_image" }
         document::Meta { name: "twitter:title", content: "Sam Zanca — Full-Stack Engineer" }
         document::Meta { name: "twitter:description", content: "Building fast, reliable products with Rust and modern web technologies." }
-        document::Meta { name: "twitter:image", content: "https://metru.dev/assets/synthwave-horizon.png" }
+        document::Meta { name: "twitter:image", content: format!("https://{}/assets/synthwave-horizon.png", env::site_domain()) }
 
         // Umami – Privacy-Focused Web Analytics
         document::Script {

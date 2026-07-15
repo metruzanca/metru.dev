@@ -163,7 +163,7 @@ mod live {
     }
 
     pub async fn fetch_live_posts() -> Vec<BlogPost> {
-        let repo = match atcrab::Repo::new("metru.dev").await {
+        let repo = match atcrab::Repo::new(crate::env::atproto_handle()).await {
             Ok(r) => r,
             Err(_) => return Vec::new(),
         };
