@@ -168,6 +168,9 @@ mod live {
             Err(_) => return Vec::new(),
         };
 
+        let did = repo.did.clone();
+        let pds = repo.pds.clone();
+
         let records = match repo
             .fetch_all_collection::<atcrab::lexicons::Document>()
             .await
@@ -178,12 +181,32 @@ mod live {
 
         records
             .into_iter()
-            .filter_map(|record| document_to_post(record.value))
+            .filter_map(|record| document_to_post(record.value, &did, &pds))
             .collect()
     }
 
-    fn document_to_post(doc: atcrab::lexicons::Document) -> Option<BlogPost> {
-        let body = blocks_to_body(&doc.content, &doc.text_content);
+    fn document_to_post(
+        doc: atcrab::lexicons::Document,
+        did: &str,
+        pds: &str,
+    ) -> Option<BlogPost> {
+        let mut body = blocks_to_body(&doc.content, &doc.text_content);
+
+        if let Some(ref cover) = doc.cover_image {
+            let blob_url = format!(
+                "{}/xrpc/com.atproto.sync.getBlob?did={}&cid={}",
+                pds.trim_end_matches('/'),
+                did,
+                cover.blob_ref.link,
+            );
+            body.insert(
+                0,
+                Block::Paragraph(vec![Inline::Image {
+                    alt: doc.title.clone(),
+                    src: blob_url,
+                }]),
+            );
+        }
 
         Some(BlogPost {
             slug: slugify(&doc.title),

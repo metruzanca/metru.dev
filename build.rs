@@ -569,15 +569,17 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
         }
     };
 
-    let docs = match rt.block_on(async {
+    let (docs, did, pds) = match rt.block_on(async {
         let repo = atcrab::Repo::new("metru.dev").await.map_err(|e| format!("ATProto repo resolve: {e}"))?;
+        let did = repo.did.clone();
+        let pds = repo.pds.clone();
         let records = repo
             .fetch_all_collection::<atcrab::lexicons::Document>()
             .await
             .map_err(|e| format!("ATProto document fetch: {e}"))?;
-        Ok::<_, String>(records)
+        Ok::<_, String>((records, did, pds))
     }) {
-        Ok(docs) => docs,
+        Ok((docs, did, pds)) => (docs, did, pds),
         Err(e) => {
             eprintln!("cargo:warning=Failed to fetch ATProto documents: {e}");
             return vec![];
@@ -594,7 +596,20 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
         let doc = &record.value;
 
         let slug = slugify(&doc.title);
-        let body = blocks_to_body_json(&doc.content, &doc.text_content);
+        let mut body = blocks_to_body_json(&doc.content, &doc.text_content);
+
+        if let Some(ref cover) = doc.cover_image {
+            let blob_url = format!(
+                "{}/xrpc/com.atproto.sync.getBlob?did={}&cid={}",
+                pds.trim_end_matches('/'),
+                did,
+                cover.blob_ref.link,
+            );
+            body.insert(
+                0,
+                serde_json::json!({"Paragraph": [{"Image": {"alt": doc.title, "src": blob_url}}]}),
+            );
+        }
 
         entries.push(AtprotoEntry {
             slug,
