@@ -190,7 +190,7 @@ mod live {
         did: &str,
         pds: &str,
     ) -> Option<BlogPost> {
-        let mut body = blocks_to_body(&doc.content, &doc.text_content);
+        let mut body = blocks_to_body(&doc.content, &doc.text_content, did, pds);
 
         if let Some(ref cover) = doc.cover_image {
             let blob_url = format!(
@@ -273,6 +273,8 @@ mod live {
     fn blocks_to_body(
         content: &Option<serde_json::Value>,
         text_content: &Option<String>,
+        did: &str,
+        pds: &str,
     ) -> Vec<Block> {
         let content = match content {
             Some(c) => c,
@@ -297,7 +299,7 @@ mod live {
                     None => continue,
                 };
 
-                if let Some(converted) = atproto_block(block) {
+                if let Some(converted) = atproto_block(block, did, pds) {
                     blocks.push(converted);
                 }
             }
@@ -312,7 +314,7 @@ mod live {
         blocks
     }
 
-    fn atproto_block(block: &serde_json::Value) -> Option<Block> {
+    fn atproto_block(block: &serde_json::Value, did: &str, pds: &str) -> Option<Block> {
         let block_type = block
             .get("$type")
             .and_then(|t| t.as_str())
@@ -322,7 +324,43 @@ mod live {
             .and_then(|t| t.as_str())
             .unwrap_or("");
 
+        // Handle known block types by suffix matching
         match block_type {
+            // ── Image ───────────────────────────────────────────────
+            t if t.ends_with(".blocks.image") => {
+                let cid = block
+                    .get("image")
+                    .and_then(|img| img.get("ref"))
+                    .and_then(|r| r.get("$link"))
+                    .and_then(|l| l.as_str())?;
+                let alt = block.get("alt").and_then(|a| a.as_str()).unwrap_or("");
+                let blob_url = format!(
+                    "{}/xrpc/com.atproto.sync.getBlob?did={}&cid={}",
+                    pds.trim_end_matches('/'),
+                    did,
+                    cid,
+                );
+                Some(Block::Paragraph(vec![Inline::Image {
+                    alt: alt.to_string(),
+                    src: blob_url,
+                }]))
+            }
+            // ── Button ──────────────────────────────────────────────
+            t if t.ends_with(".blocks.button") => {
+                let text = block.get("text").and_then(|t| t.as_str()).unwrap_or(plaintext);
+                let url = block.get("url").and_then(|u| u.as_str()).unwrap_or("");
+                if url.is_empty() {
+                    // text only — treat as paragraph
+                    let inlines = apply_facets_to_inlines(text, block.get("facets"));
+                    Some(Block::Paragraph(inlines))
+                } else {
+                    Some(Block::Paragraph(vec![Inline::Link {
+                        url: url.to_string(),
+                        children: vec![Inline::Text(text.to_string())],
+                    }]))
+                }
+            }
+            // ── Header / Text / List items / Blockquote / HR ────────
             t if t.ends_with(".blocks.header") => {
                 let level = block.get("level").and_then(|l| l.as_u64()).unwrap_or(1) as u8;
                 let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
@@ -337,7 +375,6 @@ mod live {
             }
             t if t.ends_with(".blocks.bullet") || t.ends_with(".blocks.list_item") => {
                 let inlines = apply_facets_to_inlines(plaintext, block.get("facets"));
-                // Each bullet/item becomes a single-item list for simplicity
                 Some(Block::UnorderedList(vec![inlines]))
             }
             t if t.ends_with(".blocks.blockquote") || t.ends_with(".blocks.quote") => {

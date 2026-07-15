@@ -596,7 +596,7 @@ fn fetch_atproto_entries() -> Vec<AtprotoEntry> {
         let doc = &record.value;
 
         let slug = slugify(&doc.title);
-        let mut body = blocks_to_body_json(&doc.content, &doc.text_content);
+        let mut body = blocks_to_body_json(&doc.content, &doc.text_content, &did, &pds);
 
         if let Some(ref cover) = doc.cover_image {
             let blob_url = format!(
@@ -640,6 +640,8 @@ fn slugify(s: &str) -> String {
 fn blocks_to_body_json(
     content: &Option<serde_json::Value>,
     text_content: &Option<String>,
+    did: &str,
+    pds: &str,
 ) -> Vec<serde_json::Value> {
     let content = match content {
         Some(c) => c,
@@ -664,7 +666,7 @@ fn blocks_to_body_json(
                 None => continue,
             };
 
-            if let Some(converted) = atproto_block_to_json(block) {
+            if let Some(converted) = atproto_block_to_json(block, did, pds) {
                 blocks.push(converted);
             }
         }
@@ -679,7 +681,7 @@ fn blocks_to_body_json(
     blocks
 }
 
-fn atproto_block_to_json(block: &serde_json::Value) -> Option<serde_json::Value> {
+fn atproto_block_to_json(block: &serde_json::Value, did: &str, pds: &str) -> Option<serde_json::Value> {
     let block_type = block
         .get("$type")
         .and_then(|t| t.as_str())
@@ -690,6 +692,34 @@ fn atproto_block_to_json(block: &serde_json::Value) -> Option<serde_json::Value>
         .unwrap_or("");
 
     match block_type {
+        // ── Image ───────────────────────────────────────────────
+        t if t.ends_with(".blocks.image") => {
+            let cid = block
+                .get("image")
+                .and_then(|img| img.get("ref"))
+                .and_then(|r| r.get("$link"))
+                .and_then(|l| l.as_str())?;
+            let alt = block.get("alt").and_then(|a| a.as_str()).unwrap_or("");
+            let blob_url = format!(
+                "{}/xrpc/com.atproto.sync.getBlob?did={}&cid={}",
+                pds.trim_end_matches('/'),
+                did,
+                cid,
+            );
+            Some(serde_json::json!({"Paragraph": [{"Image": {"alt": alt, "src": blob_url}}]}))
+        }
+        // ── Button ──────────────────────────────────────────────
+        t if t.ends_with(".blocks.button") => {
+            let text = block.get("text").and_then(|t| t.as_str()).unwrap_or(plaintext);
+            let url = block.get("url").and_then(|u| u.as_str()).unwrap_or("");
+            if url.is_empty() {
+                let children = apply_facets_to_inlines_json(text, block.get("facets"));
+                Some(serde_json::json!({"Paragraph": children}))
+            } else {
+                Some(serde_json::json!({"Paragraph": [{"Link": {"url": url, "children": [{"Text": text}]}}]}))
+            }
+        }
+        // ── Header / Text / List items / Blockquote / HR ────────
         t if t.ends_with(".blocks.header") => {
             let level = block.get("level").and_then(|l| l.as_u64()).unwrap_or(1) as u8;
             let children = apply_facets_to_inlines_json(plaintext, block.get("facets"));
