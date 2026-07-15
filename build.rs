@@ -57,6 +57,7 @@ fn main() {
     println!("cargo:rerun-if-changed=blog/");
 
     // Generate robots.txt
+    fs::create_dir_all(format!("{manifest_dir}/public")).unwrap();
     let domain = env::var("SITE_DOMAIN").unwrap_or_else(|_| "metru.dev".to_string());
     let robots = format!(
         "User-agent: *\n\
