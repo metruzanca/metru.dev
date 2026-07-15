@@ -145,16 +145,16 @@ static THEME: LazyLock<syntect::highlighting::Theme> = LazyLock::new(|| {
     ts.themes["base16-ocean.dark"].clone()
 });
 
-pub fn render_blocks(blocks: &[Block]) -> String {
+pub fn render_blocks(blocks: &[Block], asset_prefix: &str) -> String {
     let mut html = String::new();
     for block in blocks {
         match block {
             Block::Heading { level, children } => {
-                let inner = render_inlines(children);
+                let inner = render_inlines(children, asset_prefix);
                 html.push_str(&format!("<h{level}>{inner}</h{level}>\n"));
             }
             Block::Paragraph(children) => {
-                let inner = render_inlines(children);
+                let inner = render_inlines(children, asset_prefix);
                 html.push_str(&format!("<p>{inner}</p>\n"));
             }
             Block::CodeBlock { language, code } => {
@@ -165,7 +165,7 @@ pub fn render_blocks(blocks: &[Block]) -> String {
                 html.push_str("<ul>\n");
                 for item in items {
                     html.push_str("<li>");
-                    html.push_str(&render_inlines(item));
+                    html.push_str(&render_inlines(item, asset_prefix));
                     html.push_str("</li>\n");
                 }
                 html.push_str("</ul>\n");
@@ -174,13 +174,13 @@ pub fn render_blocks(blocks: &[Block]) -> String {
                 html.push_str("<ol>\n");
                 for item in items {
                     html.push_str("<li>");
-                    html.push_str(&render_inlines(item));
+                    html.push_str(&render_inlines(item, asset_prefix));
                     html.push_str("</li>\n");
                 }
                 html.push_str("</ol>\n");
             }
             Block::Blockquote(children) => {
-                let inner = render_blocks(children);
+                let inner = render_blocks(children, asset_prefix);
                 html.push_str(&format!("<blockquote>\n{inner}</blockquote>\n"));
             }
             Block::ThematicBreak => {
@@ -195,19 +195,19 @@ pub fn render_blocks(blocks: &[Block]) -> String {
     html
 }
 
-fn render_inlines(inlines: &[Inline]) -> String {
+fn render_inlines(inlines: &[Inline], asset_prefix: &str) -> String {
     let mut out = String::new();
     for inline in inlines {
         match inline {
             Inline::Text(t) => out.push_str(&html_escape(t)),
             Inline::Strong(children) => {
                 out.push_str("<strong>");
-                out.push_str(&render_inlines(children));
+                out.push_str(&render_inlines(children, asset_prefix));
                 out.push_str("</strong>");
             }
             Inline::Emphasis(children) => {
                 out.push_str("<em>");
-                out.push_str(&render_inlines(children));
+                out.push_str(&render_inlines(children, asset_prefix));
                 out.push_str("</em>");
             }
             Inline::InlineCode(c) => {
@@ -216,14 +216,14 @@ fn render_inlines(inlines: &[Inline]) -> String {
                 out.push_str("</code>");
             }
             Inline::Link { url, children } => {
-                let inner = render_inlines(children);
+                let inner = render_inlines(children, asset_prefix);
                 out.push_str(&format!(
                     "<a href=\"{}\">{inner}</a>",
                     html_escape(url)
                 ));
             }
             Inline::Image { alt, src } => {
-                let rewritten = rewrite_image_src(src);
+                let rewritten = rewrite_image_src(src, asset_prefix);
                 out.push_str(&format!(
                     "<img src=\"{}\" alt=\"{}\" />",
                     html_escape(&rewritten),
@@ -265,9 +265,9 @@ fn render_code_block(language: &str, code: &str) -> String {
     }
 }
 
-fn rewrite_image_src(src: &str) -> String {
+fn rewrite_image_src(src: &str, asset_prefix: &str) -> String {
     if let Some(rest) = src.strip_prefix("./_assets/") {
-        format!("/assets/blog/{rest}")
+        format!("/assets/{asset_prefix}/{rest}")
     } else {
         src.to_string()
     }

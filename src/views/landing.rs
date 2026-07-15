@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::components::portfolio::{
-    GitActivity, NowPlaying, NowPlayingStats, PortfolioContact, PortfolioHero, PortfolioProjects,
+    GitActivity, NowPlaying, NowPlayingStats, PortfolioCaseStudies, PortfolioContact, PortfolioHero, PortfolioProjects,
     PortfolioWriting,
 };
 
@@ -10,6 +10,7 @@ pub fn Landing() -> Element {
     rsx! {
         main { class: "mx-auto max-w-3xl",
             PortfolioHero {}
+            PortfolioCaseStudies {}
             PortfolioProjects {}
             PortfolioWriting {}
             GitActivity {}

@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use components::layout::SiteLayout;
-use views::{About, BlogList, BlogPost, DesignSystem, HowIWork, LabPage, LabsList, Landing, Music, ProjectsList, ResumePage};
+use views::{About, BlogList, BlogPost, DesignSystem, HowIWork, LabPage, LabsList, Landing, Music, ProjectCaseStudy, ProjectsList, ResumePage};
 
 mod blog;
 mod components;
@@ -9,6 +9,7 @@ mod env;
 mod github;
 mod labs;
 mod lastfm;
+mod projects;
 mod server_functions;
 mod utils;
 mod views;
@@ -22,6 +23,8 @@ enum Route {
         #[redirect("/index.html", || Route::Landing {})]
         #[route("/projects")]
         ProjectsList {},
+        #[route("/projects/:slug")]
+        ProjectCaseStudy { slug: String },
         #[route("/blog")]
         BlogList {},
         #[route("/blog/:slug")]

@@ -20,7 +20,7 @@ pub fn BlogPost(slug: String) -> Element {
     match post() {
         Some(post) => {
             let frontmatter = &post.frontmatter;
-            let html = use_memo(move || blog::render_blocks(&post.body));
+            let html = use_memo(move || blog::render_blocks(&post.body, "blog"));
 
             rsx! {
                 article { class: "mx-auto max-w-3xl px-6 pt-12 pb-24",

@@ -7,6 +7,7 @@ mod lab_page;
 mod labs_list;
 mod landing;
 mod music;
+mod project_detail;
 mod projects_list;
 mod resume;
 
@@ -19,5 +20,6 @@ pub use lab_page::LabPage;
 pub use labs_list::LabsList;
 pub use landing::Landing;
 pub use music::Music;
+pub use project_detail::ProjectCaseStudy;
 pub use projects_list::ProjectsList;
 pub use resume::ResumePage;

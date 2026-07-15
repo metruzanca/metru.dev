@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use crate::blog;
 use crate::labs;
+use crate::projects;
 use crate::Route;
 
 #[derive(PartialEq, Clone)]
@@ -82,6 +83,20 @@ fn all_pages() -> Vec<PageItem> {
         });
     }
 
+    for project in projects::all_projects().iter() {
+        let desc = if let Some(ref company) = project.frontmatter.company {
+            format!("{company} — {}", project.frontmatter.description)
+        } else {
+            project.frontmatter.description.clone()
+        };
+        pages.push(PageItem {
+            title: project.frontmatter.title.clone(),
+            description: desc,
+            url: format!("/projects/{}", project.slug),
+            section: "Case Studies",
+        });
+    }
+
     pages
 }
 
@@ -151,6 +166,12 @@ pub fn CommandPalette(mut open: Signal<bool>) -> Element {
             u if u.starts_with("/blog/") => {
                 let slug = u.strip_prefix("/blog/").unwrap_or("");
                 nav.push(Route::BlogPost {
+                    slug: slug.to_string(),
+                });
+            }
+            u if u.starts_with("/projects/") => {
+                let slug = u.strip_prefix("/projects/").unwrap_or("");
+                nav.push(Route::ProjectCaseStudy {
                     slug: slug.to_string(),
                 });
             }
