@@ -6,6 +6,7 @@ use ui::panel::Panel;
 use ui::input::{Input, InputGlow};
 use ui::toggle::Toggle;
 use ui::icons::{ZapIcon, ArrowRightIcon, HeartIcon, PlayIcon, PlusIcon};
+use crate::components::ds::gantt::DsProjectGantt;
 
 const BADGES: &[(&str, &str)] = &[
     ("Online", "border-accent/40 bg-accent/10 text-accent"),
@@ -258,6 +259,12 @@ pub fn DsComponentsShowcase() -> Element {
                         }
                     }
                 }
+            }
+
+            // Project Timeline (Gantt)
+            section {
+                class: "flex flex-col gap-6",
+                DsProjectGantt {}
             }
         }
     }
